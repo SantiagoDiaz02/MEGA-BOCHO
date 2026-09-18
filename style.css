@@ -78,42 +78,46 @@ h3 {
 }
 
 /* ==========================================
-   GRID DE CARDS SELECCIONABLES (Categorías/Dificultades)
+   GRID DE CARDS SELECCIONABLES
    ========================================== */
 .grid-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
   margin-top: 5px;
 }
 
-.category-card, .difficulty-card {
-  background: rgba(255, 255, 255, 0.1);
+.category-card {
+  background: rgba(255, 255, 255, 0.08);
   border: 2px solid rgba(255, 255, 255, 0.2);
   border-radius: 12px;
-  padding: 12px 8px;
+  padding: 12px 6px;
   text-align: center;
   cursor: pointer;
   user-select: none;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   color: #ffffff;
   font-weight: 700;
   font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
 }
 
-.category-card:hover, .difficulty-card:hover {
-  background: rgba(255, 255, 255, 0.2);
+.category-card:hover {
+  background: rgba(255, 255, 255, 0.18);
   transform: translateY(-2px);
 }
 
-.category-card.selected, .difficulty-card.selected {
+.category-card.selected {
   background: #00e5ff;
   color: #1a0840;
   border-color: #00e5ff;
   box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
 }
 
-.category-card input, .difficulty-card input {
+.category-card input {
   display: none;
 }
 
