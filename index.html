@@ -34,6 +34,15 @@
 
       <div class="config-group row-steppers">
         <div class="stepper-box">
+          <label>Preguntas por dificultad</label>
+          <div class="stepper-controls">
+            <button onclick="modificarNumero('num-preguntas-dif', -1, 1, 15)">-</button>
+            <input type="number" id="num-preguntas-dif" value="2" readonly>
+            <button onclick="modificarNumero('num-preguntas-dif', 1, 1, 15)">+</button>
+          </div>
+        </div>
+
+        <div class="stepper-box">
           <label>Jugadores</label>
           <div class="stepper-controls">
             <button onclick="modificarNumero('num-jugadores', -1, 2, 8, true)">-</button>
