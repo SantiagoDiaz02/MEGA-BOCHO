@@ -1,6 +1,3 @@
-// ==========================================================================
-// Estado Global (Modo Versus Exclusivo)
-// ==========================================================================
 let bancoPreguntas = {};
 let preguntasUsadas = new Set();
 
@@ -12,28 +9,52 @@ let colaPreguntasVersus = [];
 let anguloRuleta = 0;
 let preguntaActualObj = null;
 
-// ==========================================================================
-// Carga Inicial
-// ==========================================================================
 document.addEventListener("DOMContentLoaded", () => {
   fetch("preguntas.json")
     .then(res => res.json())
     .then(data => {
       bancoPreguntas = data;
-      cargarCheckboxesCategorias();
+      cargarCardsCategorias();
       generarCamposJugadores();
     })
     .catch(err => console.error("Error al cargar preguntas.json:", err));
 });
 
-function cargarCheckboxesCategorias() {
+// Cargar categorías en formato Kahoot Cards
+function cargarCardsCategorias() {
   const contenedor = document.getElementById("check-categorias");
   contenedor.innerHTML = "";
+
   Object.keys(bancoPreguntas).forEach(cat => {
-    const label = document.createElement("label");
-    label.innerHTML = `<input type="checkbox" value="${cat}" checked> ${cat}`;
-    contenedor.appendChild(label);
+    const card = document.createElement("div");
+    card.className = "category-card selected";
+    card.innerHTML = `
+      <input type="checkbox" value="${cat}" checked>
+      <span>${cat}</span>
+    `;
+
+    card.addEventListener("click", () => {
+      const cb = card.querySelector("input");
+      cb.checked = !cb.checked;
+      card.classList.toggle("selected", cb.checked);
+    });
+
+    contenedor.appendChild(card);
   });
+}
+
+// Función para subir/bajar números con las flechas
+function modificarNumero(idInput, cambio, min, max, actualizarJugadores = false) {
+  const input = document.getElementById(idInput);
+  let valor = parseInt(input.value) || min;
+  valor += cambio;
+
+  if (valor >= min && valor <= max) {
+    input.value = valor;
+    if (actualizarJugadores) {
+      generarCamposJugadores();
+    }
+  }
 }
 
 function generarCamposJugadores() {
@@ -45,21 +66,18 @@ function generarCamposJugadores() {
     const input = document.createElement("input");
     input.type = "text";
     input.id = `input-jugador-${i}`;
-    input.placeholder = `Nombre Jugador ${i}`;
+    input.placeholder = `Jugador ${i}`;
     input.value = `Jugador ${i}`;
     contenedor.appendChild(input);
   }
 }
 
-// ==========================================================================
-// Lógica de Inicio de Juego
-// ==========================================================================
 function iniciarModoVersus() {
   const checkboxes = document.querySelectorAll("#check-categorias input:checked");
   const catsElegidas = Array.from(checkboxes).map(cb => cb.value);
 
   if (catsElegidas.length === 0) {
-    alert("Por favor selecciona al menos una categoría.");
+    alert("¡Por favor seleccioná al menos una categoría!");
     return;
   }
 
@@ -69,7 +87,6 @@ function iniciarModoVersus() {
   configVersus.preguntasPorDif = parseInt(document.getElementById("num-preguntas-dif").value) || 2;
   configVersus.totalJugadores = parseInt(document.getElementById("num-jugadores").value) || 2;
 
-  // Registrar nombres personalizados de los jugadores
   jugadores = [];
   for (let i = 1; i <= configVersus.totalJugadores; i++) {
     const nombreInput = document.getElementById(`input-jugador-${i}`).value.trim();
@@ -100,7 +117,6 @@ function prepararColaCategoriaVersus() {
   dificultades.forEach(dif => {
     const pool = bancoPreguntas[catActual][dif] || [];
     const disponibles = pool.filter(p => !preguntasUsadas.has(p.id));
-    
     const seleccionadas = disponibles.sort(() => 0.5 - Math.random()).slice(0, configVersus.preguntasPorDif);
     
     seleccionadas.forEach(p => {
@@ -109,9 +125,6 @@ function prepararColaCategoriaVersus() {
   });
 }
 
-// ==========================================================================
-// Ruleta y Dinámica de Preguntas
-// ==========================================================================
 function girarRuleta() {
   const btnGirar = document.getElementById("btn-girar");
   btnGirar.disabled = true;
@@ -172,17 +185,12 @@ function responder(esCorrecta, pts) {
     alert(`Incorrecto, ${jActual.nombre}. No sumas puntos.`);
   }
 
-  // Siguiente jugador
   jugadorActualIdx = (jugadorActualIdx + 1) % jugadores.length;
-  
   document.getElementById("card-pregunta").classList.add("hidden");
   document.getElementById("btn-girar").disabled = false;
   actualizarScoreboardVersus();
 }
 
-// ==========================================================================
-// Puntuación y Control de Turnos
-// ==========================================================================
 function actualizarScoreboardVersus() {
   const jActual = jugadores[jugadorActualIdx];
   const catActual = configVersus.categorias[categoriaActualIdx];
@@ -190,7 +198,7 @@ function actualizarScoreboardVersus() {
 
   document.getElementById("txt-jugador").innerText = jActual.nombre;
   document.getElementById("txt-puntos").innerText = `${jActual.puntos} pts`;
-  document.getElementById("txt-progreso").innerText = `${catActual} (${restantes} restantes)`;
+  document.getElementById("txt-progreso").innerText = `${catActual} (${restantes} rem.)`;
 }
 
 function avanzarCategoriaVersus() {
