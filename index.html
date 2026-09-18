@@ -21,15 +21,11 @@
     <section id="sec-config-versus" class="kahoot-card">
       <h2 class="section-title">Configuración de la Sala</h2>
       
-      <!-- Selección de Categorías tipo Cards Kahoot -->
       <div class="form-group">
         <label class="group-label">Seleccioná las Categorías:</label>
-        <div id="check-categorias" class="kahoot-categories-grid">
-          <!-- Cargadas dinámicamente -->
-        </div>
+        <div id="check-categorias" class="kahoot-categories-grid"></div>
       </div>
 
-      <!-- Controles Numéricos (Steppers con Flechas) -->
       <div class="steppers-grid">
         <div class="form-group stepper-box">
           <label for="num-preguntas-dif">Preguntas por dificultad:</label>
@@ -50,12 +46,9 @@
         </div>
       </div>
 
-      <!-- Nombres de Jugadores -->
       <div class="form-group">
         <label class="group-label">Nombres de los Participantes:</label>
-        <div id="contenedor-jugadores" class="inputs-jugadores">
-          <!-- Inputs generados dinámicamente -->
-        </div>
+        <div id="contenedor-jugadores" class="inputs-jugadores"></div>
       </div>
 
       <div class="actions">
@@ -91,6 +84,16 @@
       </div>
     </section>
 
+  </div>
+
+  <!-- Modal y Fondo Oscuro de Respuesta (Estilo Kahoot) -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div id="modal-feedback" class="modal-card">
+      <div id="feedback-icon" class="feedback-icon">✔</div>
+      <h2 id="feedback-titulo" class="feedback-title">¡CORRECTO!</h2>
+      <p id="feedback-subtitulo" class="feedback-subtitle">+100 pts</p>
+      <button class="btn-kahoot-start" onclick="cerrarFeedbackYContinuar()">CONTINUAR</button>
+    </div>
   </div>
 
   <script src="app.js"></script>
