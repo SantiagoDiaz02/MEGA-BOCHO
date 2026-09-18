@@ -205,29 +205,74 @@ function mostrarPreguntaUI(p, nombreDificultad) {
     const btn = document.createElement("button");
     btn.className = "btn-opcion";
     btn.innerText = op;
-    btn.onclick = () => responder(index === p.c, p.pts);
+    btn.onclick = () => responder(index, p.c, p.pts);
     gridOps.appendChild(btn);
   });
 
   document.getElementById("card-pregunta").classList.remove("hidden");
 }
 
-function responder(esCorrecta, pts) {
+function responder(idxSeleccionado, idxCorrecto, pts) {
+  const botones = document.querySelectorAll(".btn-opcion");
+  botones.forEach(btn => btn.disabled = true);
+
+  const esCorrecta = idxSeleccionado === idxCorrecto;
   const jActual = jugadores[jugadorActualIdx];
+
+  // Marcar visualmente las opciones en la pantalla de la pregunta
+  botones.forEach((btn, index) => {
+    if (index === idxCorrecto) {
+      btn.classList.add("correcta");
+    } else if (index === idxSeleccionado && !esCorrecta) {
+      btn.classList.add("incorrecta");
+    } else {
+      btn.classList.add("atenuada");
+    }
+  });
 
   if (esCorrecta) {
     jActual.puntos += pts;
-    alert(`¡Correcto ${jActual.nombre}! Sumaste +${pts} pts.`);
-  } else {
-    alert(`Incorrecto, ${jActual.nombre}. No sumas puntos.`);
   }
 
+  // Mostrar modal con breve delay para ver la opción resaltada
+  setTimeout(() => {
+    mostrarModalFeedback(esCorrecta, jActual.nombre, pts);
+  }, 700);
+}
+
+function mostrarModalFeedback(esCorrecta, nombreJugador, pts) {
+  const modalOverlay = document.getElementById("modal-overlay");
+  const modalCard = document.getElementById("modal-feedback");
+  const icon = document.getElementById("feedback-icon");
+  const titulo = document.getElementById("feedback-titulo");
+  const subtitulo = document.getElementById("feedback-subtitulo");
+
+  modalCard.classList.remove("correcto", "incorrecto");
+
+  if (esCorrecta) {
+    modalCard.classList.add("correcto");
+    icon.innerText = "✓";
+    titulo.innerText = "¡CORRECTO!";
+    subtitulo.innerText = `${nombreJugador} sumó +${pts} pts`;
+  } else {
+    modalCard.classList.add("incorrecto");
+    icon.innerText = "✕";
+    titulo.innerText = "INCORRECTO";
+    subtitulo.innerText = `${nombreJugador} no suma puntos`;
+  }
+
+  modalOverlay.classList.remove("hidden");
+}
+
+function cerrarFeedbackYContinuar() {
+  document.getElementById("modal-overlay").classList.add("hidden");
+
   jugadorActualIdx = (jugadorActualIdx + 1) % jugadores.length;
-  
+
   document.getElementById("card-pregunta").classList.add("hidden");
   document.getElementById("contenedor-ruleta").classList.remove("hidden");
   document.getElementById("btn-girar").disabled = false;
-  
+
   actualizarScoreboardVersus();
 }
 
