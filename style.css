@@ -1,22 +1,284 @@
-/* Inputs para nombres de jugadores */
-.inputs-jugadores {
+:root {
+  --purple-dark: #25076b;
+  --purple-main: #46178f;
+  --purple-card: #381272;
+  --purple-light: #864cbf;
+  --purple-accent: #a044ff;
+  --purple-hover: #6c2bd9;
+  --text-white: #ffffff;
+  --text-muted: #d0c2f0;
+  --shadow-btn: 0 6px 0px #1a044d;
+  --shadow-active: 0 2px 0px #1a044d;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Montserrat', sans-serif;
+}
+
+body {
+  background-color: var(--purple-dark);
+  color: var(--text-white);
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 8px;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.main-container {
+  width: 100%;
+  max-width: 750px;
+}
+
+.kahoot-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.kahoot-header h1 {
+  font-size: 2.8rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-shadow: 2px 3px 0px #000;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.kahoot-card {
+  background-color: var(--purple-card);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  margin-bottom: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.section-title {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.group-label {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.form-group {
+  margin-bottom: 22px;
+}
+
+/* Checkboxes estilo Card de Kahoot */
+.kahoot-categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.category-card {
+  background-color: var(--purple-main);
+  border: 3px solid transparent;
+  border-radius: 12px;
+  padding: 14px 10px;
+  text-align: center;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 0.95rem;
+  user-select: none;
+  transition: all 0.15s ease;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+.category-card:hover {
+  background-color: var(--purple-hover);
+  transform: translateY(-2px);
+}
+
+.category-card.selected {
+  border-color: #00e5ff;
+  background-color: var(--purple-accent);
+  box-shadow: 0 0 15px rgba(160, 68, 255, 0.6);
+}
+
+.category-card input {
+  display: none;
+}
+
+/* Stepper de Números con Flechas Arriba/Abajo */
+.steppers-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.stepper-box label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  min-height: 36px;
+}
+
+.number-stepper {
+  display: flex;
+  align-items: center;
+  background-color: var(--purple-main);
+  border-radius: 12px;
+  padding: 6px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.number-stepper input[type="number"] {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 900;
+  text-align: center;
+  outline: none;
+  -moz-appearance: textfield;
+}
+
+.number-stepper input::-webkit-outer-spin-button,
+.number-stepper input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.btn-stepper {
+  background-color: var(--purple-light);
+  color: white;
+  border: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 3px 0 #57298c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-stepper:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+/* Inputs de Nombres */
+.inputs-jugadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
 }
 
 .inputs-jugadores input {
-  width: 100%;
-  padding: 10px 14px;
-  background-color: var(--bg-color);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  color: var(--text-main);
-  font-size: 0.95rem;
+  background-color: var(--purple-main);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 12px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+  outline: none;
 }
 
 .inputs-jugadores input:focus {
-  outline: none;
-  border-color: var(--accent-color);
+  border-color: #00e5ff;
+}
+
+/* Botón Principal Kahoot */
+.btn-kahoot-start {
+  width: 100%;
+  background-color: #26890c;
+  color: white;
+  border: none;
+  padding: 16px;
+  font-size: 1.3rem;
+  font-weight: 900;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #185907;
+  transition: all 0.1s ease;
+  margin-top: 10px;
+}
+
+.btn-kahoot-start:hover {
+  background-color: #2db30f;
+}
+
+.btn-kahoot-start:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #185907;
+}
+
+/* Marcador y Opciones de Preguntas */
+.scoreboard {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+}
+
+.stat small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.stat strong {
+  font-size: 1.3rem;
+}
+
+.ruleta-box {
+  background: var(--purple-main);
+  border: 4px dashed var(--purple-light);
+  padding: 30px;
+  border-radius: 16px;
+  font-size: 1.5rem;
+  font-weight: 900;
+  margin-bottom: 15px;
+  transition: transform 3s cubic-bezier(0.15, 0.9, 0.3, 1);
+}
+
+.opciones-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.btn-opcion {
+  background-color: var(--purple-main);
+  color: white;
+  border: none;
+  padding: 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #280c57;
+}
+
+.btn-opcion:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+.hidden { display: none !important; }
+.text-center { text-align: center; }
+.badge {
+  background: var(--purple-accent);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  margin-right: 5px;
 }
