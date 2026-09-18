@@ -3,97 +3,95 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MEGA BOCHO - Modo Versus</title>
+  <title>MEGA BOCHO</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Open+Sans:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
   <div class="main-container">
-    <header class="kahoot-header">
-      <h1>💜 MEGA BOCHO 💜</h1>
-      <p class="subtitle">Modo Versus por Categorías</p>
+    <header>
+      <h1>MEGA BOCHO</h1>
     </header>
 
-    <!-- Configuración de Sala Versus -->
-    <section id="sec-config-versus" class="kahoot-card">
-      <h2 class="section-title">Configuración de la Sala</h2>
-      
-      <div class="form-group">
-        <label class="group-label">Seleccioná las Categorías:</label>
-        <div id="check-categorias" class="kahoot-categories-grid"></div>
+    <!-- SECCIÓN CONFIGURACIÓN VERSUS -->
+    <section id="sec-config-versus" class="card-panel">
+      <h2>Configuración de Partida</h2>
+
+      <div class="config-group">
+        <h3>Categorías incluidas</h3>
+        <div id="check-categorias" class="grid-cards">
+          <!-- Dinámico desde app.js -->
+        </div>
       </div>
 
-      <div class="steppers-grid">
-        <div class="form-group stepper-box">
-          <label for="num-preguntas-dif">Preguntas por dificultad:</label>
-          <div class="number-stepper">
-            <button type="button" class="btn-stepper" onclick="modificarNumero('num-preguntas-dif', -1, 1, 10)">▼</button>
-            <input type="number" id="num-preguntas-dif" value="2" min="1" max="10" readonly>
-            <button type="button" class="btn-stepper" onclick="modificarNumero('num-preguntas-dif', 1, 1, 10)">▲</button>
+      <div class="config-group">
+        <h3>Dificultades incluidas</h3>
+        <div id="check-dificultades" class="grid-cards">
+          <!-- Dinámico desde app.js -->
+        </div>
+      </div>
+
+      <div class="config-group row-steppers">
+        <div class="stepper-box">
+          <label>Jugadores</label>
+          <div class="stepper-controls">
+            <button onclick="modificarNumero('num-jugadores', -1, 2, 8, true)">-</button>
+            <input type="number" id="num-jugadores" value="2" readonly>
+            <button onclick="modificarNumero('num-jugadores', 1, 2, 8, true)">+</button>
           </div>
         </div>
+      </div>
 
-        <div class="form-group stepper-box">
-          <label for="num-jugadores">Cantidad de participantes:</label>
-          <div class="number-stepper">
-            <button type="button" class="btn-stepper" onclick="modificarNumero('num-jugadores', -1, 1, 8, true)">▼</button>
-            <input type="number" id="num-jugadores" value="2" min="1" max="8" readonly>
-            <button type="button" class="btn-stepper" onclick="modificarNumero('num-jugadores', 1, 1, 8, true)">▲</button>
-          </div>
+      <div class="config-group">
+        <h3>Nombres de Jugadores</h3>
+        <div id="contenedor-jugadores" class="grid-inputs">
+          <!-- Dinámico desde app.js -->
         </div>
       </div>
 
-      <div class="form-group">
-        <label class="group-label">Nombres de los Participantes:</label>
-        <div id="contenedor-jugadores" class="inputs-jugadores"></div>
-      </div>
-
-      <div class="actions">
-        <button class="btn-kahoot-start" onclick="iniciarModoVersus()">¡EMPEZAR BATALLA!</button>
-      </div>
+      <button id="btn-iniciar" class="btn-primary" onclick="iniciarModoVersus()">¡INICIAR PARTIDA!</button>
     </section>
 
-    <!-- Tablero Principal de Juego -->
-    <section id="sec-juego" class="hidden">
-      <div class="scoreboard kahoot-card">
-        <div class="stat"><small>Turno de</small><strong id="txt-jugador">Jugador 1</strong></div>
-        <div class="stat"><small>Puntos</small><strong id="txt-puntos">0 pts</strong></div>
-        <div class="stat"><small>Estado</small><strong id="txt-progreso">Cargando...</strong></div>
+    <!-- SECCIÓN DE JUEGO (VERSUS) -->
+    <section id="sec-juego" class="card-panel hidden">
+      <!-- SCOREBOARD -->
+      <div class="scoreboard">
+        <div class="score-card">
+          <span class="label">TURNO DE</span>
+          <span id="txt-jugador" class="value-highlight">Jugador 1</span>
+        </div>
+        <div class="score-card">
+          <span class="label">PUNTOS</span>
+          <span id="txt-puntos" class="value">0 pts</span>
+        </div>
+        <div class="score-card">
+          <span class="label">ESTADO</span>
+          <span id="txt-progreso" class="value">En juego</span>
+        </div>
       </div>
 
-      <!-- Ruleta Gráfica con Flecha Indicadora -->
-      <div id="contenedor-ruleta" class="kahoot-card text-center">
-        <div class="ruleta-wrapper">
-          <div class="flecha-indicadora">▼</div>
-          <canvas id="canvas-ruleta" width="300" height="300"></canvas>
-        </div>
-        <button id="btn-girar" class="btn-kahoot-start" onclick="girarRuleta()">Girar Ruleta</button>
+      <!-- CONTENEDOR DE LA RULETA -->
+      <div id="contenedor-ruleta" class="ruleta-box">
+        <div class="flecha-indicador"></div>
+        <canvas id="canvas-ruleta" width="300" height="300"></canvas>
+        <button id="btn-girar" class="btn-primary btn-girar" onclick="girarRuleta()">GIRAR RULETA</button>
       </div>
 
-      <!-- Tarjeta de Pregunta Activa -->
-      <div id="card-pregunta" class="kahoot-card hidden">
-        <div class="pregunta-header">
-          <span id="badge-categoria" class="badge">Categoría</span>
-          <span id="badge-dificultad" class="badge badge-pts">Nivel - Pts</span>
+      <!-- TARJETA DE PREGUNTA -->
+      <div id="card-pregunta" class="card-pregunta hidden">
+        <div class="badges-row">
+          <span id="badge-categoria" class="badge bg-purple">Categoría</span>
+          <span id="badge-dificultad" class="badge bg-cyan">Dificultad</span>
         </div>
-        <h3 id="txt-pregunta">Texto de la pregunta</h3>
-        <div id="grid-opciones" class="opciones-grid"></div>
+
+        <h3 id="txt-pregunta" class="pregunta-texto">¿Texto de la pregunta?</h3>
+
+        <div id="grid-opciones" class="grid-opciones">
+          <!-- Opciones dinámicas -->
+        </div>
       </div>
     </section>
-
-  </div>
-
-  <!-- Modal y Fondo Oscuro de Respuesta (Estilo Kahoot) -->
-  <div id="modal-overlay" class="modal-overlay hidden">
-    <div id="modal-feedback" class="modal-card">
-      <div id="feedback-icon" class="feedback-icon">✔</div>
-      <h2 id="feedback-titulo" class="feedback-title">¡CORRECTO!</h2>
-      <p id="feedback-subtitulo" class="feedback-subtitle">+100 pts</p>
-      <button class="btn-kahoot-start" onclick="cerrarFeedbackYContinuar()">CONTINUAR</button>
-    </div>
   </div>
 
   <script src="app.js"></script>
