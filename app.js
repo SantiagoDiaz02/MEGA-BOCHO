@@ -1,18 +1,18 @@
 let bancoPreguntas = {};
 let preguntasUsadas = new Set();
 
-let configVersus = { categorias: [], preguntasPorDif: 2, totalJugadores: 2 };
+let configVersus = { categorias: [], dificultades: [], preguntasPorDif: 2, totalJugadores: 2 };
 let jugadores = [];
 let jugadorActualIdx = 0;
 let categoriaRondaActual = null;
 
-// Progreso de dificultad independiente por categoría (índice 0 a 4)
+// Progreso de dificultad independiente por categoría (índice sobre el array filtrado de dificultades)
 let progresoDificultadCategoria = {};
 
 let anguloActual = 0;
 let enGiro = false;
 
-const nivelesDificultad = ["muy_facil", "facil", "intermedia", "dificil", "muy_dificil"];
+const todasLasDificultades = ["muy_facil", "facil", "intermedia", "dificil", "muy_dificil"];
 const puntosPorDif = { muy_facil: 100, facil: 150, intermedia: 200, dificil: 250, muy_dificil: 300 };
 const coloresRuleta = ["#a044ff", "#00e5ff", "#ff007f", "#ffb703", "#10b981", "#8b5cf6", "#ec4899"];
 
@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
     .then(data => {
       bancoPreguntas = data;
       cargarCardsCategorias();
+      cargarCardsDificultades();
       generarCamposJugadores();
     })
     .catch(err => console.error("Error al cargar preguntas.json:", err));
@@ -29,6 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function cargarCardsCategorias() {
   const contenedor = document.getElementById("check-categorias");
+  if (!contenedor) return;
   contenedor.innerHTML = "";
 
   Object.keys(bancoPreguntas).forEach(cat => {
@@ -37,6 +39,29 @@ function cargarCardsCategorias() {
     card.innerHTML = `
       <input type="checkbox" value="${cat}" checked>
       <span>${cat}</span>
+    `;
+
+    card.addEventListener("click", () => {
+      const cb = card.querySelector("input");
+      cb.checked = !cb.checked;
+      card.classList.toggle("selected", cb.checked);
+    });
+
+    contenedor.appendChild(card);
+  });
+}
+
+function cargarCardsDificultades() {
+  const contenedor = document.getElementById("check-dificultades");
+  if (!contenedor) return;
+  contenedor.innerHTML = "";
+
+  todasLasDificultades.forEach(dif => {
+    const card = document.createElement("div");
+    card.className = "difficulty-card selected";
+    card.innerHTML = `
+      <input type="checkbox" value="${dif}" checked>
+      <span>${dif.replace('_', ' ').toUpperCase()}</span>
     `;
 
     card.addEventListener("click", () => {
@@ -76,18 +101,30 @@ function generarCamposJugadores() {
 }
 
 function iniciarModoVersus() {
-  const checkboxes = document.querySelectorAll("#check-categorias input:checked");
-  const catsElegidas = Array.from(checkboxes).map(cb => cb.value);
+  const cbCats = document.querySelectorAll("#check-categorias input:checked");
+  const catsElegidas = Array.from(cbCats).map(cb => cb.value);
 
-  if (catsElegidas.length === 0) return;
+  const cbDifs = document.querySelectorAll("#check-dificultades input:checked");
+  const difsElegidas = Array.from(cbDifs).map(cb => cb.value);
+
+  if (catsElegidas.length === 0) {
+    alert("Seleccioná al menos una categoría");
+    return;
+  }
+
+  if (difsElegidas.length === 0) {
+    alert("Seleccioná al menos un nivel de dificultad");
+    return;
+  }
 
   preguntasUsadas.clear();
 
   configVersus.categorias = catsElegidas;
-  configVersus.preguntasPorDif = parseInt(document.getElementById("num-preguntas-dif").value) || 2;
+  // Mantener el orden relativo estándar (muy_facil -> muy_dificil) para las dificultades elegidas
+  configVersus.dificultades = todasLasDificultades.filter(d => difsElegidas.includes(d));
   configVersus.totalJugadores = parseInt(document.getElementById("num-jugadores").value) || 2;
 
-  // Inicializar el nivel de dificultad de cada categoría seleccionada en 0 (muy_facil)
+  // Inicializar cada categoría en la primera dificultad elegida (índice 0)
   progresoDificultadCategoria = {};
   catsElegidas.forEach(cat => {
     progresoDificultadCategoria[cat] = 0;
@@ -178,22 +215,22 @@ function girarRuleta() {
 
 function obtenerPreguntaYMostrar() {
   let idxDif = progresoDificultadCategoria[categoriaRondaActual];
-  
-  // Si la categoría ya superó todas las dificultades disponibles
-  if (idxDif >= nivelesDificultad.length) {
+  const difsSeleccionadas = configVersus.dificultades;
+
+  if (idxDif >= difsSeleccionadas.length) {
     verificarQuedanPreguntasOFinalizar();
     return;
   }
 
-  let difActual = nivelesDificultad[idxDif];
+  let difActual = difsSeleccionadas[idxDif];
   let pool = (bancoPreguntas[categoriaRondaActual] && bancoPreguntas[categoriaRondaActual][difActual]) || [];
   let disponibles = pool.filter(p => !preguntasUsadas.has(p.id));
 
-  // Si no quedan preguntas disponibles en este nivel de dificultad, avanzar al siguiente
-  while (disponibles.length === 0 && idxDif < nivelesDificultad.length - 1) {
+  // Buscar en los siguientes niveles tildados si no quedan en el actual
+  while (disponibles.length === 0 && idxDif < difsSeleccionadas.length - 1) {
     idxDif++;
     progresoDificultadCategoria[categoriaRondaActual] = idxDif;
-    difActual = nivelesDificultad[idxDif];
+    difActual = difsSeleccionadas[idxDif];
     pool = (bancoPreguntas[categoriaRondaActual] && bancoPreguntas[categoriaRondaActual][difActual]) || [];
     disponibles = pool.filter(p => !preguntasUsadas.has(p.id));
   }
@@ -216,11 +253,12 @@ function obtenerPreguntaYMostrar() {
 
 function verificarQuedanPreguntasOFinalizar() {
   let quedanPreguntasTotales = false;
+  const difsSeleccionadas = configVersus.dificultades;
 
   for (let cat of configVersus.categorias) {
     let idx = progresoDificultadCategoria[cat];
-    while (idx < nivelesDificultad.length) {
-      let dif = nivelesDificultad[idx];
+    while (idx < difsSeleccionadas.length) {
+      let dif = difsSeleccionadas[idx];
       let pool = (bancoPreguntas[cat] && bancoPreguntas[cat][dif]) || [];
       if (pool.some(p => !preguntasUsadas.has(p.id))) {
         quedanPreguntasTotales = true;
@@ -285,11 +323,10 @@ function responder(idxSeleccionado, idxCorrecto, pts) {
   setTimeout(() => {
     jugadorActualIdx++;
 
-    // Si respondieron todos los jugadores de la tanda actual:
     if (jugadorActualIdx >= jugadores.length) {
       jugadorActualIdx = 0;
 
-      // Avanzar el nivel de dificultad de esta categoría para su próxima aparición en la ruleta
+      // Avanzar al siguiente nivel tildado en la configuración
       progresoDificultadCategoria[categoriaRondaActual]++;
 
       categoriaRondaActual = null;
@@ -300,7 +337,6 @@ function responder(idxSeleccionado, idxCorrecto, pts) {
 
       actualizarScoreboardVersus("¡Nueva tanda! Girá la ruleta");
     } else {
-      // El siguiente jugador responde otra pregunta del MISMO nivel de dificultad de la tanda
       obtenerPreguntaYMostrar();
     }
   }, 2000);
