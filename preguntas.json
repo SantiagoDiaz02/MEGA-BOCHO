@@ -1,0 +1,137 @@
+{
+  "Historia": {
+    "muy_facil": [
+      { "id": 101, "q": "¿En qué año llegó Cristóbal Colón a América?", "ops": ["1492", "1500", "1488", "1512"], "c": 0 },
+      { "id": 102, "q": "¿En qué país se encuentran las Pirámides de Guiza?", "ops": ["Grecia", "Egipto", "Roma", "México"], "c": 1 },
+      { "id": 103, "q": "¿Quién fue el primer presidente de los Estados Unidos?", "ops": ["Abraham Lincoln", "George Washington", "Thomas Jefferson", "John Adams"], "c": 1 }
+    ],
+    "facil": [
+      { "id": 104, "q": "¿En qué año comenzó la Segunda Guerra Mundial?", "ops": ["1914", "1939", "1945", "1929"], "c": 1 },
+      { "id": 105, "q": "¿Qué famosa estructura fue derribada en Berlín en 1989?", "ops": ["El Muro de Berlín", "La Torre Eiffel", "El Coliseo", "El Arco de Triunfo"], "c": 0 },
+      { "id": 106, "q": "¿Qué imperio dominaba gran parte de Europa y el Mediterráneo en la antigüedad?", "ops": ["Imperio Azteca", "Imperio Romano", "Imperio Inca", "Imperio Persa"], "c": 1 }
+    ],
+    "intermedia": [
+      { "id": 107, "q": "¿Qué militar francés se proclamó emperador en 1804?", "ops": ["Luis XIV", "Napoleón Bonaparte", "Robespierre", "Carlos Magno"], "c": 1 },
+      { "id": 108, "q": "¿En qué año comenzó la Revolución Francesa?", "ops": ["1789", "1776", "1812", "1799"], "c": 0 },
+      { "id": 109, "q": "¿Qué civilización precolombina construyó la ciudadela de Machu Picchu?", "ops": ["Maya", "Azteca", "Inca", "Guaraní"], "c": 2 }
+    ],
+    "dificil": [
+      { "id": 110, "q": "¿En qué año se firmó la Declaración de Independencia de los EE. UU.?", "ops": ["1776", "1789", "1804", "1765"], "c": 0 },
+      { "id": 111, "q": "¿Qué tratado puso fin oficialmente a la Primera Guerra Mundial?", "ops": ["Tratado de Utrecht", "Tratado de Versalles", "Tratado de París", "Tratado de Tordesillas"], "c": 1 },
+      { "id": 112, "q": "¿Quién fue la última reina del Antiguo Egipto de la dinastía ptolemaica?", "ops": ["Nefertiti", "Hatshepsut", "Cleopatra VII", "Isis"], "c": 2 }
+    ],
+    "muy_dificil": [
+      { "id": 113, "q": "¿Cuánto tiempo duró realmente la Guerra de los Cien Años entre Francia e Inglaterra?", "ops": ["100 años", "116 años", "99 años", "105 años"], "c": 1 },
+      { "id": 114, "q": "¿En qué año cayó Constantinopla marcando el fin del Imperio Bizantino?", "ops": ["1453", "1492", "1350", "1501"], "c": 0 },
+      { "id": 115, "q": "¿Qué dinastía gobernaba China cuando se completó la mayor parte de la Gran Muralla?", "ops": ["Dinastía Han", "Dinastía Tang", "Dinastía Ming", "Dinastía Song"], "c": 2 }
+    ]
+  },
+  "Ciencia": {
+    "muy_facil": [
+      { "id": 201, "q": "¿Cuál es la fórmula química del agua?", "ops": ["H2O", "CO2", "O2", "NaCl"], "c": 0 },
+      { "id": 202, "q": "¿Cuál es el planeta más cercano al Sol?", "ops": ["Venus", "Mercurio", "Marte", "Tierra"], "c": 1 },
+      { "id": 203, "q": "¿Qué órgano del cuerpo humano bombea la sangre a todo el organismo?", "ops": ["Pulmón", "Hígado", "Corazón", "Cerebro"], "c": 2 }
+    ],
+    "facil": [
+      { "id": 204, "q": "¿Cuál es el gas más abundante en la atmósfera terrestre?", "ops": ["Oxígeno", "Nitrógeno", "Dióxido de Carbono", "Hidrógeno"], "c": 1 },
+      { "id": 205, "q": "¿Qué fuerza atrae los objetos hacia el centro de la Tierra?", "ops": ["Magnetismo", "Fricción", "Gravedad", "Fuerza Centrífuga"], "c": 2 },
+      { "id": 206, "q": "¿Cuál es el animal mamífero más grande del planeta?", "ops": ["Elefante Africano", "Ballena Azul", "Jirafa", "Tiburón Ballena"], "c": 1 }
+    ],
+    "intermedia": [
+      { "id": 207, "q": "¿Cuál es el elemento químico más ligero y abundante del universo?", "ops": ["Helio", "Hidrógeno", "Litio", "Oxígeno"], "c": 1 },
+      { "id": 208, "q": "¿Qué organelo vegetal realiza la fotosíntesis?", "ops": ["Mitocondria", "Núcleo", "Cloroplasto", "Ribosoma"], "c": 2 },
+      { "id": 209, "q": "¿A qué velocidad aproximada viaja la luz en el vacío?", "ops": ["300.000 km/s", "150.000 km/s", "1.000.000 km/s", "500.000 km/s"], "c": 0 }
+    ],
+    "dificil": [
+      { "id": 210, "q": "¿Cuál es la unidad de medida de la frecuencia en el Sistema Internacional?", "ops": ["Joule", "Pascal", "Hertz", "Newton"], "c": 2 },
+      { "id": 211, "q": "¿Quién formuló la teoría de la relatividad general?", "ops": ["Isaac Newton", "Albert Einstein", "Niels Bohr", "Galileo Galilei"], "c": 1 },
+      { "id": 212, "q": "¿Qué partícula subatómica tiene carga eléctrica negativa?", "ops": ["Protón", "Neutrón", "Electrón", "Positrón"], "c": 2 }
+    ],
+    "muy_dificil": [
+      { "id": 213, "q": "¿Qué hueso es el más pequeño del cuerpo humano?", "ops": ["Estribo", "Yunque", "Martillo", "Falange"], "c": 0 },
+      { "id": 214, "q": "¿Qué enlace químico implica la transferencia completa de electrones entre átomos?", "ops": ["Covalente", "Iónico", "Metálico", "Puente de Hidrógeno"], "c": 1 },
+      { "id": 215, "q": "¿Cuál es el valor aproximado de la constante de aceleración de la gravedad terrestre?", "ops": ["9.81 m/s²", "10.5 m/s²", "8.92 m/s²", "9.50 m/s²"], "c": 0 }
+    ]
+  },
+  "Geografia": {
+    "muy_facil": [
+      { "id": 301, "q": "¿Cuál es la capital de Francia?", "ops": ["Madrid", "Londres", "París", "Roma"], "c": 2 },
+      { "id": 302, "q": "¿En qué continente se encuentra Argentina?", "ops": ["Europa", "América", "África", "Asia"], "c": 1 },
+      { "id": 303, "q": "¿Cuál es el océano más grande del planeta?", "ops": ["Atlántico", "Índico", "Pacífico", "Ártico"], "c": 2 }
+    ],
+    "facil": [
+      { "id": 304, "q": "¿Cuál es el país más extenso del mundo en superficie?", "ops": ["Canadá", "Rusia", "China", "Estados Unidos"], "c": 1 },
+      { "id": 305, "q": "¿Qué cordillera atraviesa América del Sur de sur a norte?", "ops": ["Himalaya", "Los Alpes", "Los Andes", "Montañas Rocosas"], "c": 2 },
+      { "id": 306, "q": "¿Cuál es la capital de Italia?", "ops": ["Milán", "Venecia", "Roma", "Florencia"], "c": 2 }
+    ],
+    "intermedia": [
+      { "id": 307, "q": "¿Qué río es considerado el más caudaloso del mundo?", "ops": ["Nilo", "Amazonas", "Misisipi", "Yangtsé"], "c": 1 },
+      { "id": 308, "q": "¿Cuál es el país más poblado del mundo actualmente?", "ops": ["China", "India", "Estados Unidos", "Indonesia"], "c": 1 },
+      { "id": 309, "q": "¿Qué estrecho separa el sur de España del norte de Marruecos?", "ops": ["Estrecho de Bering", "Estrecho de Gibraltar", "Estrecho de Magallanes", "Canal de la Mancha"], "c": 1 }
+    ],
+    "dificil": [
+      { "id": 310, "q": "¿Cuál es la capital oficial de Australia?", "ops": ["Sídney", "Melbourne", "Canberra", "Brisbane"], "c": 2 },
+      { "id": 311, "q": "¿Qué país de América del Sur no tiene salida al mar además de Bolivia?", "ops": ["Paraguay", "Uruguay", "Ecuador", "Guyana"], "c": 0 },
+      { "id": 312, "q": "¿En qué país se ubica el desierto de Atacama?", "ops": ["Perú", "Chile", "Bolivia", "Argentina"], "c": 1 }
+    ],
+    "muy_dificil": [
+      { "id": 313, "q": "¿Cuál es el país soberano más pequeño del mundo?", "ops": ["Mónaco", "Nauru", "Ciudad del Vaticano", "Liechtenstein"], "c": 2 },
+      { "id": 314, "q": "¿Cuál es la capital de Canadá?", "ops": ["Toronto", "Vancouver", "Ottawa", "Montreal"], "c": 2 },
+      { "id": 315, "q": "¿Qué lago es considerado el cuerpo de agua dulce más profundo del mundo?", "ops": ["Lago Superior", "Lago Baikal", "Lago Victoria", "Lago Titicaca"], "c": 1 }
+    ]
+  },
+  "Futbol": {
+    "muy_facil": [
+      { "id": 401, "q": "¿Cuántos jugadores por equipo entran al campo en un partido de fútbol?", "ops": ["11", "10", "12", "9"], "c": 0 },
+      { "id": 402, "q": "¿Cada cuántos años se disputa la Copa Mundial de la FIFA?", "ops": ["2 años", "4 años", "3 años", "5 años"], "c": 1 },
+      { "id": 403, "q": "¿Qué país ganó la Copa Mundial de Fútbol en Qatar 2022?", "ops": ["Francia", "Brasil", "Argentina", "Croacia"], "c": 2 }
+    ],
+    "facil": [
+      { "id": 404, "q": "¿Qué selección ha ganado más Mundiales en la historia del fútbol?", "ops": ["Alemania", "Italia", "Brasil", "Argentina"], "c": 2 },
+      { "id": 405, "q": "¿Cómo se le llama a la falta máxima sancionada dentro del área rival?", "ops": ["Tiro libre", "Penal", "Córner", "Saque de banda"], "c": 1 },
+      { "id": 406, "q": "¿En qué club español jugó Lionel Messi la mayor parte de su carrera?", "ops": ["Real Madrid", "FC Barcelona", "Atlético de Madrid", "Sevilla"], "c": 1 }
+    ],
+    "intermedia": [
+      { "id": 407, "q": "¿Qué jugador convirtió el famoso gol 'La Mano de Dios' en el Mundial de 1986?", "ops": ["Pelé", "Diego Maradona", "Johan Cruyff", "Ronaldo Nazário"], "c": 1 },
+      { "id": 408, "q": "¿Qué club inglés es conocido con el apodo de 'Red Devils' (Diablos Rojos)?", "ops": ["Liverpool", "Manchester United", "Arsenal", "Chelsea"], "c": 1 },
+      { "id": 409, "q": "¿Qué torneo continental de clubes disputan los mejores equipos de Europa?", "ops": ["Copa Libertadores", "UEFA Champions League", "Copa Sudamericana", "Europa League"], "c": 1 }
+    ],
+    "dificil": [
+      { "id": 410, "q": "¿En qué país se celebró el primer Mundial de Fútbol en 1930?", "ops": ["Brasil", "Uruguay", "Italia", "Francia"], "c": 1 },
+      { "id": 411, "q": "¿Qué jugador posee el récord de haber ganado más Balones de Oro en la historia?", "ops": ["Cristiano Ronaldo", "Lionel Messi", "Michel Platini", "Marco van Basten"], "c": 1 },
+      { "id": 412, "q": "¿Qué selección nacional ganó la Eurocopa disputada en 2021 (Euro 2020)?", "ops": ["Inglaterra", "Italia", "España", "Portugal"], "c": 1 }
+    ],
+    "muy_dificil": [
+      { "id": 413, "q": "¿Quién era el director técnico de la selección de Alemania durante el Mundial de Brasil 2014?", "ops": ["Jürgen Klopp", "Joachim Löw", "Hans-Dieter Flick", "Jupp Heynckes"], "c": 1 },
+      { "id": 414, "q": "¿En qué club europeo jugaba Cristiano Ronaldo cuando ganó su primer Balón de Oro en 2008?", "ops": ["Real Madrid", "Manchester United", "Juventus", "Sporting de Lisboa"], "c": 1 },
+      { "id": 415, "q": "¿Quién convirtió el gol decisivo en el minuto 116 para España en la final del Mundial 2010?", "ops": ["Xavi Hernández", "Andrés Iniesta", "David Villa", "Fernando Torres"], "c": 1 }
+    ]
+  },
+  "Entretenimiento": {
+    "muy_facil": [
+      { "id": 501, "q": "¿Cómo se llama el famoso fontanero con gorra roja de Nintendo?", "ops": ["Luigi", "Mario", "Sonic", "Yoshi"], "c": 1 },
+      { "id": 502, "q": "¿Qué personaje vive en una piña debajo del mar?", "ops": ["Bob Esponja", "Patricio", "Calamardo", "Don Cangrejo"], "c": 0 },
+      { "id": 503, "q": "¿Qué superhéroe es conocido como el 'Caballero de la Noche'?", "ops": ["Superman", "Batman", "Spider-Man", "Iron Man"], "c": 1 }
+    ],
+    "facil": [
+      { "id": 504, "q": "¿Qué estudio cinematográfico creó la película 'Toy Story'?", "ops": ["DreamWorks", "Pixar", "Illumination", "Universal"], "c": 1 },
+      { "id": 505, "q": "¿Qué banda británica interpretó la canción 'Bohemian Rhapsody'?", "ops": ["Queen", "The Beatles", "Pink Floyd", "The Rolling Stones"], "c": 0 },
+      { "id": 506, "q": "¿Cómo se llama el reino congelado en la película 'Frozen'?", "ops": ["Arendelle", "Genovia", "Madagascar", "Narnia"], "c": 0 }
+    ],
+    "intermedia": [
+      { "id": 507, "q": "¿Qué actor interpretó al Joker en la película 'El Caballero de la Noche' (2008)?", "ops": ["Joaquin Phoenix", "Heath Ledger", "Jared Leto", "Jack Nicholson"], "c": 1 },
+      { "id": 508, "q": "¿Cómo se llama la realidad virtual en la que viven los humanos en 'Matrix'?", "ops": ["The Oasis", "Matrix", "Cyberpunk", "Grid"], "c": 1 },
+      { "id": 509, "q": "¿Cuál es el premio más importante entregado a la excelencia en el cine estadounidense?", "ops": ["Grammy", "Oscar", "Emmy", "Tony"], "c": 1 }
+    ],
+    "dificil": [
+      { "id": 510, "q": "¿Quién dirigió la trilogía cinematográfica de 'El Señor de los Anillos'?", "ops": ["Steven Spielberg", "Christopher Nolan", "Peter Jackson", "James Cameron"], "c": 2 },
+      { "id": 511, "q": "¿En qué año se estrenó la primera película de Star Wars en cines?", "ops": ["1977", "1980", "1975", "1983"], "c": 0 },
+      { "id": 512, "q": "¿Qué consola de videojuegos fue lanzada originalmente por Sony en 1994?", "ops": ["Nintendo 64", "PlayStation", "Sega Saturn", "GameCube"], "c": 1 }
+    ],
+    "muy_dificil": [
+      { "id": 513, "q": "¿Cuál fue el primer largometraje animado a color producido por Walt Disney?", "ops": ["Pinocho", "Blancanieves y los siete enanitos", "Fantasía", "Bambi"], "c": 1 },
+      { "id": 514, "q": "¿Qué grupo pop sueco ganó Eurovisión en 1974 con el tema 'Waterloo'?", "ops": ["ABBA", "A-ha", "Roxette", "Ace of Base"], "c": 0 },
+      { "id": 515, "q": "¿Cómo se llama la ciudad ficticia donde transcurre la serie animada 'Los Simpson'?", "ops": ["Shelbyville", "Springfield", "Quahog", "South Park"], "c": 1 }
+    ]
+  }
+}
