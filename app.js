@@ -4,12 +4,10 @@ let preguntasUsadas = new Set();
 let configVersus = { categorias: [], preguntasPorDif: 2, totalJugadores: 2 };
 let jugadores = [];
 let jugadorActualIdx = 0;
-let categoriaActualIdx = 0;
-let colaPreguntasVersus = [];
+let categoriaRondaActual = null; // Guarda la categoría elegida por la ruleta para la tanda
 
 let anguloActual = 0;
 let enGiro = false;
-let preguntaActualObj = null;
 
 const coloresRuleta = ["#a044ff", "#00e5ff", "#ff007f", "#ffb703", "#10b981", "#8b5cf6", "#ec4899"];
 
@@ -76,9 +74,7 @@ function iniciarModoVersus() {
   const checkboxes = document.querySelectorAll("#check-categorias input:checked");
   const catsElegidas = Array.from(checkboxes).map(cb => cb.value);
 
-  if (catsElegidas.length === 0) {
-    return;
-  }
+  if (catsElegidas.length === 0) return;
 
   preguntasUsadas.clear();
 
@@ -96,15 +92,14 @@ function iniciarModoVersus() {
   }
 
   jugadorActualIdx = 0;
-  categoriaActualIdx = 0;
+  categoriaRondaActual = null;
 
-  prepararColaCategoriaVersus();
   dibujarRuleta();
 
   document.getElementById("sec-config-versus").classList.add("hidden");
   document.getElementById("sec-juego").classList.remove("hidden");
 
-  actualizarScoreboardVersus();
+  actualizarScoreboardVersus("¡Girá para la tanda!");
 }
 
 function dibujarRuleta() {
@@ -139,24 +134,6 @@ function dibujarRuleta() {
   });
 }
 
-function prepararColaCategoriaVersus() {
-  const catActual = configVersus.categorias[categoriaActualIdx];
-  colaPreguntasVersus = [];
-
-  const dificultades = ["muy_facil", "facil", "intermedia", "dificil", "muy_dificil"];
-  const puntosPorDif = { muy_facil: 100, facil: 150, intermedia: 200, dificil: 250, muy_dificil: 300 };
-
-  dificultades.forEach(dif => {
-    const pool = bancoPreguntas[catActual][dif] || [];
-    const disponibles = pool.filter(p => !preguntasUsadas.has(p.id));
-    const seleccionadas = disponibles.sort(() => 0.5 - Math.random()).slice(0, configVersus.preguntasPorDif);
-    
-    seleccionadas.forEach(p => {
-      colaPreguntasVersus.push({ ...p, categoria: catActual, dificultadNombre: dif, pts: puntosPorDif[dif] });
-    });
-  });
-}
-
 function girarRuleta() {
   if (enGiro) return;
   enGiro = true;
@@ -166,28 +143,69 @@ function girarRuleta() {
   document.getElementById("card-pregunta").classList.add("hidden");
 
   const girosExtra = 5 + Math.floor(Math.random() * 5);
-  const anguloExtra = Math.floor(Math.random() * 360);
-  anguloActual += girosExtra * 360 + anguloExtra;
+  const anguloGrados = Math.floor(Math.random() * 360);
+  anguloActual += girosExtra * 360 + anguloGrados;
 
   const canvas = document.getElementById("canvas-ruleta");
   canvas.style.transform = `rotate(${anguloActual}deg)`;
 
   setTimeout(() => {
-    obtenerPreguntaVersus();
+    // Calcular categoría según la posición final de la aguja
+    const anguloNormalizado = (360 - (anguloActual % 360)) % 360;
+    const cantCategorias = configVersus.categorias.length;
+    const tamanioSector = 360 / cantCategorias;
+    const indiceGanador = Math.floor(anguloNormalizado / tamanioSector);
+    
+    // Asignar categoría fija para toda esta tanda de preguntas
+    categoriaRondaActual = configVersus.categorias[indiceGanador];
+    
+    // Iniciar el primer turno de la tanda
+    obtenerPreguntaYMostrar();
     enGiro = false;
   }, 3500);
 }
 
-function obtenerPreguntaVersus() {
-  if (colaPreguntasVersus.length === 0) {
-    avanzarCategoriaVersus();
+function obtenerPreguntaYMostrar() {
+  const dificultades = ["muy_facil", "facil", "intermedia", "dificil", "muy_dificil"];
+  const puntosPorDif = { muy_facil: 100, facil: 150, intermedia: 200, dificil: 250, muy_dificil: 300 };
+  
+  let preguntaSeleccionada = null;
+
+  // Buscar una pregunta disponible en la categoría de la tanda actual
+  for (let dif of dificultades) {
+    const pool = bancoPreguntas[categoriaRondaActual][dif] || [];
+    const disponibles = pool.filter(p => !preguntasUsadas.has(p.id));
+
+    if (disponibles.length > 0) {
+      const elegida = disponibles[Math.floor(Math.random() * disponibles.length)];
+      preguntaSeleccionada = { ...elegida, categoria: categoriaRondaActual, dificultadNombre: dif, pts: puntosPorDif[dif] };
+      break;
+    }
+  }
+
+  // Si no quedan preguntas en la categoría seleccionada por la ruleta
+  if (!preguntaSeleccionada) {
+    let quedanPreguntasTotales = false;
+    for (let cat of configVersus.categorias) {
+      for (let dif of dificultades) {
+        if ((bancoPreguntas[cat][dif] || []).some(p => !preguntasUsadas.has(p.id))) {
+          quedanPreguntasTotales = true;
+          break;
+        }
+      }
+    }
+
+    if (quedanPreguntasTotales) {
+      actualizarScoreboardVersus(`¡${categoriaRondaActual} sin preguntas! Volvé a girar.`);
+      document.getElementById("btn-girar").disabled = false;
+    } else {
+      mostrarResultadosVersus();
+    }
     return;
   }
 
-  preguntaActualObj = colaPreguntasVersus.shift();
-
   document.getElementById("contenedor-ruleta").classList.add("hidden");
-  mostrarPreguntaUI(preguntaActualObj, preguntaActualObj.dificultadNombre.replace('_', ' '));
+  mostrarPreguntaUI(preguntaSeleccionada, preguntaSeleccionada.dificultadNombre.replace('_', ' '));
 }
 
 function mostrarPreguntaUI(p, nombreDificultad) {
@@ -209,12 +227,11 @@ function mostrarPreguntaUI(p, nombreDificultad) {
   });
 
   document.getElementById("card-pregunta").classList.remove("hidden");
+  actualizarScoreboardVersus(`Tanda: ${categoriaRondaActual}`);
 }
 
 function responder(idxSeleccionado, idxCorrecto, pts) {
   const botones = document.querySelectorAll(".btn-opcion");
-  
-  // Deshabilitar botones inmediatamente para prevenir doble click
   botones.forEach(btn => btn.disabled = true);
 
   const esCorrecta = idxSeleccionado === idxCorrecto;
@@ -224,7 +241,6 @@ function responder(idxSeleccionado, idxCorrecto, pts) {
     jActual.puntos += pts;
   }
 
-  // Iluminar la respuesta seleccionada y la correcta
   botones.forEach((btn, index) => {
     if (index === idxCorrecto) {
       btn.classList.add("correcta");
@@ -235,40 +251,34 @@ function responder(idxSeleccionado, idxCorrecto, pts) {
     }
   });
 
-  // Esperar 2 segundos mostrando los colores y pasar de turno fluidamente
   setTimeout(() => {
-    jugadorActualIdx = (jugadorActualIdx + 1) % jugadores.length;
-    
-    document.getElementById("card-pregunta").classList.add("hidden");
-    document.getElementById("contenedor-ruleta").classList.remove("hidden");
-    document.getElementById("btn-girar").disabled = false;
+    // Pasar al siguiente jugador
+    jugadorActualIdx++;
 
-    actualizarScoreboardVersus();
+    // Si ya respondieron TODOS los jugadores de la partida:
+    if (jugadorActualIdx >= jugadores.length) {
+      // Reiniciar índice al primer jugador
+      jugadorActualIdx = 0;
+      categoriaRondaActual = null; // Liberar categoría para requerir un nuevo giro de ruleta
+
+      document.getElementById("card-pregunta").classList.add("hidden");
+      document.getElementById("contenedor-ruleta").classList.remove("hidden");
+      document.getElementById("btn-girar").disabled = false;
+
+      actualizarScoreboardVersus("¡Nueva tanda! Girá la ruleta");
+    } else {
+      // Todavía quedan jugadores en esta tanda: mostrar pregunta directa de la MISMA categoría
+      obtenerPreguntaYMostrar();
+    }
   }, 2000);
 }
 
-function actualizarScoreboardVersus() {
+function actualizarScoreboardVersus(estadoTexto = "") {
   const jActual = jugadores[jugadorActualIdx];
-  const catActual = configVersus.categorias[categoriaActualIdx];
-  const restantes = colaPreguntasVersus.length;
 
   document.getElementById("txt-jugador").innerText = jActual.nombre;
   document.getElementById("txt-puntos").innerText = `${jActual.puntos} pts`;
-  document.getElementById("txt-progreso").innerText = `${catActual} (${restantes} rem.)`;
-}
-
-function avanzarCategoriaVersus() {
-  categoriaActualIdx++;
-  if (categoriaActualIdx < configVersus.categorias.length) {
-    prepararColaCategoriaVersus();
-    actualizarScoreboardVersus();
-    
-    document.getElementById("card-pregunta").classList.add("hidden");
-    document.getElementById("contenedor-ruleta").classList.remove("hidden");
-    document.getElementById("btn-girar").disabled = false;
-  } else {
-    mostrarResultadosVersus();
-  }
+  document.getElementById("txt-progreso").innerText = estadoTexto || "En juego";
 }
 
 function mostrarResultadosVersus() {
