@@ -1,102 +1,216 @@
-// Base de preguntas (Pool de 15 por categoría con 5 dificultades: 100 a 300 pts)
-const categorias = ["Historia", "Ciencia", "Entretenimiento"];
+// ==========================================================================
+// Estado Global (Modo Versus Exclusivo)
+// ==========================================================================
+let bancoPreguntas = {};
+let preguntasUsadas = new Set();
 
-const preguntas = {
-  "Historia": [
-    { nivel: 1, pts: 100, q: "¿En qué año llegó Colón a América?", ops: ["1492", "1500", "1488"], c: 0 },
-    { nivel: 2, pts: 150, q: "¿Quién fue el primer presidente de EE.UU.?", ops: ["Lincoln", "Washington", "Jefferson"], c: 1 },
-    { nivel: 3, pts: 200, q: "¿En qué año cayó el Muro de Berlín?", ops: ["1989", "1991", "1975"], c: 0 },
-    { nivel: 4, pts: 250, q: "¿Qué imperio construyó Machu Picchu?", ops: ["Azteca", "Maya", "Inca"], c: 2 },
-    { nivel: 5, pts: 300, q: "¿Duración de la Guerra de los Cien Años?", ops: ["100 años", "116 años", "99 años"], c: 1 }
-  ],
-  "Ciencia": [
-    { nivel: 1, pts: 100, q: "¿Símbolo químico del Agua?", ops: ["H2O", "O2", "CO2"], c: 0 },
-    { nivel: 2, pts: 150, q: "¿Planeta más cercano al Sol?", ops: ["Venus", "Mercurio", "Marte"], c: 1 },
-    { nivel: 3, pts: 200, q: "¿Gas más abundante en la atmósfera?", ops: ["Oxígeno", "Nitrógeno", "Hidrógeno"], c: 1 },
-    { nivel: 4, pts: 250, q: "¿Velocidad aproximada de la luz?", ops: ["300.000 km/s", "150.000 km/s", "1.000.000 km/s"], c: 0 },
-    { nivel: 5, pts: 300, q: "¿Unidad de medida de la fuerza?", ops: ["Joule", "Pascal", "Newton"], c: 2 }
-  ],
-  "Entretenimiento": [
-    { nivel: 1, pts: 100, q: "¿Nombre del fontanero de Nintendo?", ops: ["Luigi", "Mario", "Sonic"], c: 1 },
-    { nivel: 2, pts: 150, q: "¿Compañía creadora de Mickey Mouse?", ops: ["Pixar", "Disney", "DreamWorks"], c: 1 },
-    { nivel: 3, pts: 200, q: "¿Superhéroe conocido como el Caballero de la Noche?", ops: ["Superman", "Batman", "Spider-Man"], c: 1 },
-    { nivel: 4, pts: 250, q: "¿Banda británica creadora de 'Bohemian Rhapsody'?", ops: ["Queen", "The Beatles", "Pink Floyd"], c: 0 },
-    { nivel: 5, pts: 300, q: "¿Premio más importante del cine?", ops: ["Grammy", "Oscar", "Emmy"], c: 1 }
-  ]
-};
-
-// Control de Estado del Juego
-let puntos = 0;
-let preguntasEnTurno = 0;
-let jugadorActual = 1;
+let configVersus = { categorias: [], preguntasPorDif: 2, totalJugadores: 2 };
+let jugadores = [];
+let jugadorActualIdx = 0;
+let categoriaActualIdx = 0;
+let colaPreguntasVersus = [];
 let anguloRuleta = 0;
+let preguntaActualObj = null;
 
+// ==========================================================================
+// Carga Inicial
+// ==========================================================================
+document.addEventListener("DOMContentLoaded", () => {
+  fetch("preguntas.json")
+    .then(res => res.json())
+    .then(data => {
+      bancoPreguntas = data;
+      cargarCheckboxesCategorias();
+      generarCamposJugadores();
+    })
+    .catch(err => console.error("Error al cargar preguntas.json:", err));
+});
+
+function cargarCheckboxesCategorias() {
+  const contenedor = document.getElementById("check-categorias");
+  contenedor.innerHTML = "";
+  Object.keys(bancoPreguntas).forEach(cat => {
+    const label = document.createElement("label");
+    label.innerHTML = `<input type="checkbox" value="${cat}" checked> ${cat}`;
+    contenedor.appendChild(label);
+  });
+}
+
+function generarCamposJugadores() {
+  const num = parseInt(document.getElementById("num-jugadores").value) || 2;
+  const contenedor = document.getElementById("contenedor-jugadores");
+  contenedor.innerHTML = "";
+
+  for (let i = 1; i <= num; i++) {
+    const input = document.createElement("input");
+    input.type = "text";
+    input.id = `input-jugador-${i}`;
+    input.placeholder = `Nombre Jugador ${i}`;
+    input.value = `Jugador ${i}`;
+    contenedor.appendChild(input);
+  }
+}
+
+// ==========================================================================
+// Lógica de Inicio de Juego
+// ==========================================================================
+function iniciarModoVersus() {
+  const checkboxes = document.querySelectorAll("#check-categorias input:checked");
+  const catsElegidas = Array.from(checkboxes).map(cb => cb.value);
+
+  if (catsElegidas.length === 0) {
+    alert("Por favor selecciona al menos una categoría.");
+    return;
+  }
+
+  preguntasUsadas.clear();
+
+  configVersus.categorias = catsElegidas;
+  configVersus.preguntasPorDif = parseInt(document.getElementById("num-preguntas-dif").value) || 2;
+  configVersus.totalJugadores = parseInt(document.getElementById("num-jugadores").value) || 2;
+
+  // Registrar nombres personalizados de los jugadores
+  jugadores = [];
+  for (let i = 1; i <= configVersus.totalJugadores; i++) {
+    const nombreInput = document.getElementById(`input-jugador-${i}`).value.trim();
+    jugadores.push({
+      nombre: nombreInput !== "" ? nombreInput : `Jugador ${i}`,
+      puntos: 0
+    });
+  }
+
+  jugadorActualIdx = 0;
+  categoriaActualIdx = 0;
+
+  prepararColaCategoriaVersus();
+
+  document.getElementById("sec-config-versus").classList.add("hidden");
+  document.getElementById("sec-juego").classList.remove("hidden");
+
+  actualizarScoreboardVersus();
+}
+
+function prepararColaCategoriaVersus() {
+  const catActual = configVersus.categorias[categoriaActualIdx];
+  colaPreguntasVersus = [];
+
+  const dificultades = ["muy_facil", "facil", "intermedia", "dificil", "muy_dificil"];
+  const puntosPorDif = { muy_facil: 100, facil: 150, intermedia: 200, dificil: 250, muy_dificil: 300 };
+
+  dificultades.forEach(dif => {
+    const pool = bancoPreguntas[catActual][dif] || [];
+    const disponibles = pool.filter(p => !preguntasUsadas.has(p.id));
+    
+    const seleccionadas = disponibles.sort(() => 0.5 - Math.random()).slice(0, configVersus.preguntasPorDif);
+    
+    seleccionadas.forEach(p => {
+      colaPreguntasVersus.push({ ...p, categoria: catActual, dificultadNombre: dif, pts: puntosPorDif[dif] });
+    });
+  });
+}
+
+// ==========================================================================
+// Ruleta y Dinámica de Preguntas
+// ==========================================================================
 function girarRuleta() {
-  document.getElementById("btn-girar").disabled = true;
+  const btnGirar = document.getElementById("btn-girar");
+  btnGirar.disabled = true;
   document.getElementById("card-pregunta").classList.add("hidden");
 
-  // Giro visual aleatorio
-  const vueltas = 5 + Math.floor(Math.random() * 5);
+  const vueltas = 4 + Math.floor(Math.random() * 4);
   const gradosExtra = Math.floor(Math.random() * 360);
   anguloRuleta += (vueltas * 360) + gradosExtra;
 
-  const ruletaEl = document.getElementById("ruleta");
+  const ruletaEl = document.getElementById("ruleta-visual");
   ruletaEl.style.transform = `rotate(${anguloRuleta}deg)`;
 
-  // Elegir categoría aleatoria
-  const catElegida = categorias[Math.floor(Math.random() * categorias.length)];
-
   setTimeout(() => {
-    ruletaEl.innerText = catElegida;
-    mostrarPregunta(catElegida);
+    obtenerPreguntaVersus();
   }, 3000);
 }
 
-function mostrarPregunta(categoria) {
-  // Elegir una pregunta aleatoria de la categoría
-  const lista = preguntas[categoria];
-  const p = lista[Math.floor(Math.random() * lista.length)];
+function obtenerPreguntaVersus() {
+  if (colaPreguntasVersus.length === 0) {
+    avanzarCategoriaVersus();
+    return;
+  }
 
-  document.getElementById("txt-categoria").innerText = categoria;
-  document.getElementById("txt-dificultad").innerText = `${p.pts} pts (Nivel ${p.nivel})`;
+  preguntaActualObj = colaPreguntasVersus.shift();
+  document.getElementById("ruleta-visual").innerText = preguntaActualObj.categoria;
+
+  mostrarPreguntaUI(preguntaActualObj, preguntaActualObj.dificultadNombre.replace('_', ' '));
+}
+
+function mostrarPreguntaUI(p, nombreDificultad) {
+  preguntasUsadas.add(p.id);
+
+  document.getElementById("badge-categoria").innerText = p.categoria;
+  document.getElementById("badge-dificultad").innerText = `${nombreDificultad.toUpperCase()} - ${p.pts} pts`;
   document.getElementById("txt-pregunta").innerText = p.q;
 
-  const contenedorOps = document.getElementById("opciones");
-  contenedorOps.innerHTML = "";
+  const gridOps = document.getElementById("grid-opciones");
+  gridOps.innerHTML = "";
 
   p.ops.forEach((op, index) => {
     const btn = document.createElement("button");
     btn.className = "btn-opcion";
     btn.innerText = op;
     btn.onclick = () => responder(index === p.c, p.pts);
-    contenedorOps.appendChild(btn);
+    gridOps.appendChild(btn);
   });
 
   document.getElementById("card-pregunta").classList.remove("hidden");
 }
 
 function responder(esCorrecta, pts) {
+  const jActual = jugadores[jugadorActualIdx];
+
   if (esCorrecta) {
-    puntos += pts;
-    alert(`¡Correcto! Sumas ${pts} puntos.`);
+    jActual.puntos += pts;
+    alert(`¡Correcto ${jActual.nombre}! Sumaste +${pts} pts.`);
   } else {
-    alert("Incorrecto.");
+    alert(`Incorrecto, ${jActual.nombre}. No sumas puntos.`);
   }
 
-  preguntasEnTurno++;
+  // Siguiente jugador
+  jugadorActualIdx = (jugadorActualIdx + 1) % jugadores.length;
   
-  // Cambia de jugador cada 3 preguntas
-  if (preguntasEnTurno >= 3) {
-    preguntasEnTurno = 0;
-    jugadorActual = jugadorActual === 1 ? 2 : 1;
-    alert(`¡Fin del turno! Le toca al Jugador ${jugadorActual}`);
-  }
-
-  // Actualizar tablero
-  document.getElementById("p-puntos").innerHTML = `Puntos: <strong>${puntos}</strong>`;
-  document.getElementById("p-jugador").innerHTML = `Jugador actual: <strong>Jugador ${jugadorActual}</strong>`;
-  document.getElementById("p-turno").innerHTML = `Pregunta del turno: <strong>${preguntasEnTurno + 1} / 3</strong>`;
-
   document.getElementById("card-pregunta").classList.add("hidden");
   document.getElementById("btn-girar").disabled = false;
+  actualizarScoreboardVersus();
+}
+
+// ==========================================================================
+// Puntuación y Control de Turnos
+// ==========================================================================
+function actualizarScoreboardVersus() {
+  const jActual = jugadores[jugadorActualIdx];
+  const catActual = configVersus.categorias[categoriaActualIdx];
+  const restantes = colaPreguntasVersus.length;
+
+  document.getElementById("txt-jugador").innerText = jActual.nombre;
+  document.getElementById("txt-puntos").innerText = `${jActual.puntos} pts`;
+  document.getElementById("txt-progreso").innerText = `${catActual} (${restantes} restantes)`;
+}
+
+function avanzarCategoriaVersus() {
+  categoriaActualIdx++;
+  if (categoriaActualIdx < configVersus.categorias.length) {
+    alert(`📌 Categoria finalizada. Siguiente categoría: ${configVersus.categorias[categoriaActualIdx]}`);
+    prepararColaCategoriaVersus();
+    actualizarScoreboardVersus();
+    document.getElementById("btn-girar").disabled = false;
+  } else {
+    mostrarResultadosVersus();
+  }
+}
+
+function mostrarResultadosVersus() {
+  let mensaje = "🏆 ¡PARTIDA FINALIZADA! 🏆\n\nResultados:\n";
+  const ranking = [...jugadores].sort((a, b) => b.puntos - a.puntos);
+  ranking.forEach((j, index) => {
+    mensaje += `${index + 1}. ${j.nombre}: ${j.puntos} pts\n`;
+  });
+  alert(mensaje);
+  location.reload();
 }
