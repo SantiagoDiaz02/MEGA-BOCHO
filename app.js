@@ -6,8 +6,12 @@ let jugadores = [];
 let jugadorActualIdx = 0;
 let categoriaActualIdx = 0;
 let colaPreguntasVersus = [];
-let anguloRuleta = 0;
+
+let anguloActual = 0;
+let enGiro = false;
 let preguntaActualObj = null;
+
+const coloresRuleta = ["#a044ff", "#00e5ff", "#ff007f", "#ffb703", "#10b981", "#8b5cf6", "#ec4899"];
 
 document.addEventListener("DOMContentLoaded", () => {
   fetch("preguntas.json")
@@ -20,7 +24,6 @@ document.addEventListener("DOMContentLoaded", () => {
     .catch(err => console.error("Error al cargar preguntas.json:", err));
 });
 
-// Cargar categorías en formato Kahoot Cards
 function cargarCardsCategorias() {
   const contenedor = document.getElementById("check-categorias");
   contenedor.innerHTML = "";
@@ -43,7 +46,6 @@ function cargarCardsCategorias() {
   });
 }
 
-// Función para subir/bajar números con las flechas
 function modificarNumero(idInput, cambio, min, max, actualizarJugadores = false) {
   const input = document.getElementById(idInput);
   let valor = parseInt(input.value) || min;
@@ -51,9 +53,7 @@ function modificarNumero(idInput, cambio, min, max, actualizarJugadores = false)
 
   if (valor >= min && valor <= max) {
     input.value = valor;
-    if (actualizarJugadores) {
-      generarCamposJugadores();
-    }
+    if (actualizarJugadores) generarCamposJugadores();
   }
 }
 
@@ -100,11 +100,44 @@ function iniciarModoVersus() {
   categoriaActualIdx = 0;
 
   prepararColaCategoriaVersus();
+  dibujarRuleta();
 
   document.getElementById("sec-config-versus").classList.add("hidden");
   document.getElementById("sec-juego").classList.remove("hidden");
 
   actualizarScoreboardVersus();
+}
+
+function dibujarRuleta() {
+  const canvas = document.getElementById("canvas-ruleta");
+  const ctx = canvas.getContext("2d");
+  const cant = configVersus.categorias.length;
+  const anguloPaso = (2 * Math.PI) / cant;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  configVersus.categorias.forEach((cat, i) => {
+    const anguloInicio = i * anguloPaso;
+    const anguloFin = anguloInicio + anguloPaso;
+
+    ctx.beginPath();
+    ctx.moveTo(150, 150);
+    ctx.arc(150, 150, 150, anguloInicio, anguloFin);
+    ctx.fillStyle = coloresRuleta[i % coloresRuleta.length];
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#25076b";
+    ctx.stroke();
+
+    ctx.save();
+    ctx.translate(150, 150);
+    ctx.rotate(anguloInicio + anguloPaso / 2);
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 14px Montserrat";
+    ctx.fillText(cat, 130, 5);
+    ctx.restore();
+  });
 }
 
 function prepararColaCategoriaVersus() {
@@ -126,20 +159,24 @@ function prepararColaCategoriaVersus() {
 }
 
 function girarRuleta() {
+  if (enGiro) return;
+  enGiro = true;
+
   const btnGirar = document.getElementById("btn-girar");
   btnGirar.disabled = true;
   document.getElementById("card-pregunta").classList.add("hidden");
 
-  const vueltas = 4 + Math.floor(Math.random() * 4);
-  const gradosExtra = Math.floor(Math.random() * 360);
-  anguloRuleta += (vueltas * 360) + gradosExtra;
+  const girosExtra = 5 + Math.floor(Math.random() * 5);
+  const anguloExtra = Math.floor(Math.random() * 360);
+  anguloActual += girosExtra * 360 + anguloExtra;
 
-  const ruletaEl = document.getElementById("ruleta-visual");
-  ruletaEl.style.transform = `rotate(${anguloRuleta}deg)`;
+  const canvas = document.getElementById("canvas-ruleta");
+  canvas.style.transform = `rotate(${anguloActual}deg)`;
 
   setTimeout(() => {
     obtenerPreguntaVersus();
-  }, 3000);
+    enGiro = false;
+  }, 3500);
 }
 
 function obtenerPreguntaVersus() {
@@ -149,8 +186,8 @@ function obtenerPreguntaVersus() {
   }
 
   preguntaActualObj = colaPreguntasVersus.shift();
-  document.getElementById("ruleta-visual").innerText = preguntaActualObj.categoria;
 
+  document.getElementById("contenedor-ruleta").classList.add("hidden");
   mostrarPreguntaUI(preguntaActualObj, preguntaActualObj.dificultadNombre.replace('_', ' '));
 }
 
@@ -186,8 +223,11 @@ function responder(esCorrecta, pts) {
   }
 
   jugadorActualIdx = (jugadorActualIdx + 1) % jugadores.length;
+  
   document.getElementById("card-pregunta").classList.add("hidden");
+  document.getElementById("contenedor-ruleta").classList.remove("hidden");
   document.getElementById("btn-girar").disabled = false;
+  
   actualizarScoreboardVersus();
 }
 
@@ -207,6 +247,9 @@ function avanzarCategoriaVersus() {
     alert(`📌 Categoria finalizada. Siguiente categoría: ${configVersus.categorias[categoriaActualIdx]}`);
     prepararColaCategoriaVersus();
     actualizarScoreboardVersus();
+    
+    document.getElementById("card-pregunta").classList.add("hidden");
+    document.getElementById("contenedor-ruleta").classList.remove("hidden");
     document.getElementById("btn-girar").disabled = false;
   } else {
     mostrarResultadosVersus();
