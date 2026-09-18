@@ -6,9 +6,8 @@ let jugadores = [];
 let jugadorActualIdx = 0;
 let categoriaRondaActual = null;
 
-// Control de avance por categoría y cuota de preguntas
-let progresoDificultadCategoria = {}; // { Categoria: indiceDificultadActual }
-let contadorPreguntasPorDif = {};     // { Categoria_Dificultad: cantidadRespondida }
+let progresoDificultadCategoria = {}; 
+let contadorPreguntasPorDif = {};     
 
 let anguloActual = 0;
 let enGiro = false;
@@ -166,8 +165,13 @@ function dibujarRuleta() {
   const canvas = document.getElementById("canvas-ruleta");
   const ctx = canvas.getContext("2d");
   const cant = configVersus.categorias.length;
-  const anguloPaso = (2 * Math.PI) / cant;
 
+  if (cant === 0) {
+    mostrarResultadosVersus();
+    return;
+  }
+
+  const anguloPaso = (2 * Math.PI) / cant;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   configVersus.categorias.forEach((cat, i) => {
@@ -196,6 +200,12 @@ function dibujarRuleta() {
 
 function girarRuleta() {
   if (enGiro) return;
+
+  if (configVersus.categorias.length === 0) {
+    mostrarResultadosVersus();
+    return;
+  }
+
   enGiro = true;
 
   const btnGirar = document.getElementById("btn-girar");
@@ -230,14 +240,13 @@ function obtenerPreguntaYMostrar() {
   const difsSeleccionadas = configVersus.dificultades;
 
   if (idxDif >= difsSeleccionadas.length) {
-    verificarQuedanPreguntasOFinalizar();
+    eliminarCategoriaCompletada(categoriaRondaActual);
     return;
   }
 
   let difActual = difsSeleccionadas[idxDif];
   let claveContador = `${categoriaRondaActual}_${difActual}`;
 
-  // Si ya se alcanzó la cuota de preguntas requeridas para esta dificultad, pasar al siguiente nivel
   if (contadorPreguntasPorDif[claveContador] >= configVersus.preguntasPorDif) {
     progresoDificultadCategoria[categoriaRondaActual]++;
     obtenerPreguntaYMostrar();
@@ -268,33 +277,21 @@ function obtenerPreguntaYMostrar() {
     document.getElementById("contenedor-ruleta").classList.add("hidden");
     mostrarPreguntaUI(preguntaSeleccionada, preguntaSeleccionada.dificultadNombre);
   } else {
-    verificarQuedanPreguntasOFinalizar();
+    eliminarCategoriaCompletada(categoriaRondaActual);
   }
 }
 
-function verificarQuedanPreguntasOFinalizar() {
-  let quedanPreguntasTotales = false;
-  const difsSeleccionadas = configVersus.dificultades;
+function eliminarCategoriaCompletada(catCompletada) {
+  configVersus.categorias = configVersus.categorias.filter(c => c !== catCompletada);
+  
+  // Resetear la rotación visual al recalibrar sectores de la ruleta
+  const canvas = document.getElementById("canvas-ruleta");
+  canvas.style.transform = `rotate(0deg)`;
+  anguloActual = 0;
 
-  for (let cat of configVersus.categorias) {
-    let idx = progresoDificultadCategoria[cat];
-    while (idx < difsSeleccionadas.length) {
-      let dif = difsSeleccionadas[idx];
-      let clave = `${cat}_${dif}`;
-      if (contadorPreguntasPorDif[clave] < configVersus.preguntasPorDif) {
-        let pool = (bancoPreguntas[cat] && bancoPreguntas[cat][dif]) || [];
-        if (pool.some(p => !preguntasUsadas.has(p.id))) {
-          quedanPreguntasTotales = true;
-          break;
-        }
-      }
-      idx++;
-    }
-    if (quedanPreguntasTotales) break;
-  }
-
-  if (quedanPreguntasTotales) {
-    actualizarScoreboardVersus(`¡${categoriaRondaActual} completada! Volvé a girar.`);
+  if (configVersus.categorias.length > 0) {
+    dibujarRuleta();
+    actualizarScoreboardVersus(`¡${catCompletada} eliminada! Girá de nuevo.`);
     document.getElementById("btn-girar").disabled = false;
   } else {
     mostrarResultadosVersus();
@@ -376,11 +373,26 @@ function actualizarScoreboardVersus(estadoTexto = "") {
 }
 
 function mostrarResultadosVersus() {
-  let mensaje = "🏆 ¡PARTIDA FINALIZADA! 🏆\n\nResultados:\n";
   const ranking = [...jugadores].sort((a, b) => b.puntos - a.puntos);
+  const contenedorPodio = document.getElementById("contenedor-podio");
+  contenedorPodio.innerHTML = "";
+
+  const iconos = ["🥇", "🥈", "🥉"];
+
   ranking.forEach((j, index) => {
-    mensaje += `${index + 1}. ${j.nombre}: ${j.puntos} pts\n`;
+    const item = document.createElement("div");
+    item.className = `podio-item puesto-${index + 1}`;
+    
+    const icono = iconos[index] || `#${index + 1}`;
+    
+    item.innerHTML = `
+      <div class="podio-pos">${icono}</div>
+      <div class="podio-nombre">${j.nombre}</div>
+      <div class="podio-puntos">${j.puntos} pts</div>
+    `;
+    
+    contenedorPodio.appendChild(item);
   });
-  alert(mensaje);
-  location.reload();
+
+  document.getElementById("modal-resultados").classList.remove("hidden");
 }
