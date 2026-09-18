@@ -6,7 +6,9 @@ let jugadores = [];
 let jugadorActualIdx = 0;
 let categoriaRondaActual = null;
 
-let progresoDificultadCategoria = {};
+// Control de avance por categoría y cuota de preguntas
+let progresoDificultadCategoria = {}; // { Categoria: indiceDificultadActual }
+let contadorPreguntasPorDif = {};     // { Categoria_Dificultad: cantidadRespondida }
 
 let anguloActual = 0;
 let enGiro = false;
@@ -64,7 +66,7 @@ function cargarCardsDificultades() {
 
   todasLasDificultades.forEach(dif => {
     const card = document.createElement("div");
-    card.className = "category-card selected"; // Mismos estilos que las tarjetas de categoría
+    card.className = "category-card selected";
     card.innerHTML = `
       <input type="checkbox" value="${dif}" checked>
       <span>${nombresLegiblesDif[dif]}</span>
@@ -127,11 +129,17 @@ function iniciarModoVersus() {
 
   configVersus.categorias = catsElegidas;
   configVersus.dificultades = todasLasDificultades.filter(d => difsElegidas.includes(d));
+  configVersus.preguntasPorDif = parseInt(document.getElementById("num-preguntas-dif").value) || 2;
   configVersus.totalJugadores = parseInt(document.getElementById("num-jugadores").value) || 2;
 
   progresoDificultadCategoria = {};
+  contadorPreguntasPorDif = {};
+
   catsElegidas.forEach(cat => {
     progresoDificultadCategoria[cat] = 0;
+    configVersus.dificultades.forEach(dif => {
+      contadorPreguntasPorDif[`${cat}_${dif}`] = 0;
+    });
   });
 
   jugadores = [];
@@ -227,6 +235,15 @@ function obtenerPreguntaYMostrar() {
   }
 
   let difActual = difsSeleccionadas[idxDif];
+  let claveContador = `${categoriaRondaActual}_${difActual}`;
+
+  // Si ya se alcanzó la cuota de preguntas requeridas para esta dificultad, pasar al siguiente nivel
+  if (contadorPreguntasPorDif[claveContador] >= configVersus.preguntasPorDif) {
+    progresoDificultadCategoria[categoriaRondaActual]++;
+    obtenerPreguntaYMostrar();
+    return;
+  }
+
   let pool = (bancoPreguntas[categoriaRondaActual] && bancoPreguntas[categoriaRondaActual][difActual]) || [];
   let disponibles = pool.filter(p => !preguntasUsadas.has(p.id));
 
@@ -234,6 +251,7 @@ function obtenerPreguntaYMostrar() {
     idxDif++;
     progresoDificultadCategoria[categoriaRondaActual] = idxDif;
     difActual = difsSeleccionadas[idxDif];
+    claveContador = `${categoriaRondaActual}_${difActual}`;
     pool = (bancoPreguntas[categoriaRondaActual] && bancoPreguntas[categoriaRondaActual][difActual]) || [];
     disponibles = pool.filter(p => !preguntasUsadas.has(p.id));
   }
@@ -262,10 +280,13 @@ function verificarQuedanPreguntasOFinalizar() {
     let idx = progresoDificultadCategoria[cat];
     while (idx < difsSeleccionadas.length) {
       let dif = difsSeleccionadas[idx];
-      let pool = (bancoPreguntas[cat] && bancoPreguntas[cat][dif]) || [];
-      if (pool.some(p => !preguntasUsadas.has(p.id))) {
-        quedanPreguntasTotales = true;
-        break;
+      let clave = `${cat}_${dif}`;
+      if (contadorPreguntasPorDif[clave] < configVersus.preguntasPorDif) {
+        let pool = (bancoPreguntas[cat] && bancoPreguntas[cat][dif]) || [];
+        if (pool.some(p => !preguntasUsadas.has(p.id))) {
+          quedanPreguntasTotales = true;
+          break;
+        }
       }
       idx++;
     }
@@ -282,6 +303,11 @@ function verificarQuedanPreguntasOFinalizar() {
 
 function mostrarPreguntaUI(p, nombreDificultad) {
   preguntasUsadas.add(p.id);
+
+  let idxDif = progresoDificultadCategoria[categoriaRondaActual];
+  let difActual = configVersus.dificultades[idxDif];
+  let claveContador = `${categoriaRondaActual}_${difActual}`;
+  contadorPreguntasPorDif[claveContador] = (contadorPreguntasPorDif[claveContador] || 0) + 1;
 
   document.getElementById("badge-categoria").innerText = p.categoria;
   document.getElementById("badge-dificultad").innerText = `${nombreDificultad.toUpperCase()} - ${p.pts} pts`;
@@ -328,7 +354,6 @@ function responder(idxSeleccionado, idxCorrecto, pts) {
 
     if (jugadorActualIdx >= jugadores.length) {
       jugadorActualIdx = 0;
-      progresoDificultadCategoria[categoriaRondaActual]++;
       categoriaRondaActual = null;
 
       document.getElementById("card-pregunta").classList.add("hidden");
