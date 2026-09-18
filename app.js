@@ -4,7 +4,7 @@ let preguntasUsadas = new Set();
 let configVersus = { categorias: [], preguntasPorDif: 2, totalJugadores: 2 };
 let jugadores = [];
 let jugadorActualIdx = 0;
-let categoriaRondaActual = null; // Guarda la categoría elegida por la ruleta para la tanda
+let categoriaRondaActual = null; // Categoria fijada por la ruleta para la tanda de todos los jugadores
 
 let anguloActual = 0;
 let enGiro = false;
@@ -142,6 +142,7 @@ function girarRuleta() {
   btnGirar.disabled = true;
   document.getElementById("card-pregunta").classList.add("hidden");
 
+  // Giro de física aleatoria
   const girosExtra = 5 + Math.floor(Math.random() * 5);
   const anguloGrados = Math.floor(Math.random() * 360);
   anguloActual += girosExtra * 360 + anguloGrados;
@@ -150,16 +151,19 @@ function girarRuleta() {
   canvas.style.transform = `rotate(${anguloActual}deg)`;
 
   setTimeout(() => {
-    // Calcular categoría según la posición final de la aguja
-    const anguloNormalizado = (360 - (anguloActual % 360)) % 360;
     const cantCategorias = configVersus.categorias.length;
-    const tamanioSector = 360 / cantCategorias;
-    const indiceGanador = Math.floor(anguloNormalizado / tamanioSector);
-    
-    // Asignar categoría fija para toda esta tanda de preguntas
+    const gradosPorSector = 360 / cantCategorias;
+
+    // Ajuste matemático de ángulo:
+    // La flecha está arriba a 270°. Al rotar en sentido horario, los sectores pasan de forma decreciente.
+    let anguloRelativo = (270 - (anguloActual % 360)) % 360;
+    if (anguloRelativo < 0) anguloRelativo += 360;
+
+    const indiceGanador = Math.floor(anguloRelativo / gradosPorSector);
+
+    // Fijar categoría de la ronda
     categoriaRondaActual = configVersus.categorias[indiceGanador];
-    
-    // Iniciar el primer turno de la tanda
+
     obtenerPreguntaYMostrar();
     enGiro = false;
   }, 3500);
@@ -169,43 +173,50 @@ function obtenerPreguntaYMostrar() {
   const dificultades = ["muy_facil", "facil", "intermedia", "dificil", "muy_dificil"];
   const puntosPorDif = { muy_facil: 100, facil: 150, intermedia: 200, dificil: 250, muy_dificil: 300 };
   
-  let preguntaSeleccionada = null;
+  let poolDisponibles = [];
 
-  // Buscar una pregunta disponible en la categoría de la tanda actual
-  for (let dif of dificultades) {
-    const pool = bancoPreguntas[categoriaRondaActual][dif] || [];
-    const disponibles = pool.filter(p => !preguntasUsadas.has(p.id));
-
-    if (disponibles.length > 0) {
-      const elegida = disponibles[Math.floor(Math.random() * disponibles.length)];
-      preguntaSeleccionada = { ...elegida, categoria: categoriaRondaActual, dificultadNombre: dif, pts: puntosPorDif[dif] };
-      break;
-    }
-  }
-
-  // Si no quedan preguntas en la categoría seleccionada por la ruleta
-  if (!preguntaSeleccionada) {
-    let quedanPreguntasTotales = false;
-    for (let cat of configVersus.categorias) {
-      for (let dif of dificultades) {
-        if ((bancoPreguntas[cat][dif] || []).some(p => !preguntasUsadas.has(p.id))) {
-          quedanPreguntasTotales = true;
-          break;
-        }
+  // Juntar todas las preguntas no respondidas de la categoría de esta ronda
+  dificultades.forEach(dif => {
+    const preguntasDificultad = (bancoPreguntas[categoriaRondaActual] && bancoPreguntas[categoriaRondaActual][dif]) || [];
+    preguntasDificultad.forEach(p => {
+      if (!preguntasUsadas.has(p.id)) {
+        poolDisponibles.push({
+          ...p,
+          categoria: categoriaRondaActual,
+          dificultadNombre: dif,
+          pts: puntosPorDif[dif]
+        });
       }
-    }
+    });
+  });
 
-    if (quedanPreguntasTotales) {
-      actualizarScoreboardVersus(`¡${categoriaRondaActual} sin preguntas! Volvé a girar.`);
-      document.getElementById("btn-girar").disabled = false;
-    } else {
-      mostrarResultadosVersus();
-    }
+  // Si hay preguntas disponibles, elegir una al azar
+  if (poolDisponibles.length > 0) {
+    const indiceAzar = Math.floor(Math.random() * poolDisponibles.length);
+    const preguntaSeleccionada = poolDisponibles[indiceAzar];
+
+    document.getElementById("contenedor-ruleta").classList.add("hidden");
+    mostrarPreguntaUI(preguntaSeleccionada, preguntaSeleccionada.dificultadNombre.replace('_', ' '));
     return;
   }
 
-  document.getElementById("contenedor-ruleta").classList.add("hidden");
-  mostrarPreguntaUI(preguntaSeleccionada, preguntaSeleccionada.dificultadNombre.replace('_', ' '));
+  // Si se agotaron en la categoría actual, verificar si quedan en alguna otra
+  let quedanPreguntasTotales = false;
+  for (let cat of configVersus.categorias) {
+    for (let dif of dificultades) {
+      if ((bancoPreguntas[cat] && bancoPreguntas[cat][dif] || []).some(p => !preguntasUsadas.has(p.id))) {
+        quedanPreguntasTotales = true;
+        break;
+      }
+    }
+  }
+
+  if (quedanPreguntasTotales) {
+    actualizarScoreboardVersus(`¡${categoriaRondaActual} sin preguntas! Volvé a girar.`);
+    document.getElementById("btn-girar").disabled = false;
+  } else {
+    mostrarResultadosVersus();
+  }
 }
 
 function mostrarPreguntaUI(p, nombreDificultad) {
@@ -241,6 +252,7 @@ function responder(idxSeleccionado, idxCorrecto, pts) {
     jActual.puntos += pts;
   }
 
+  // Iluminar la respuesta correcta e incorrecta sin alert()
   botones.forEach((btn, index) => {
     if (index === idxCorrecto) {
       btn.classList.add("correcta");
@@ -252,14 +264,12 @@ function responder(idxSeleccionado, idxCorrecto, pts) {
   });
 
   setTimeout(() => {
-    // Pasar al siguiente jugador
     jugadorActualIdx++;
 
-    // Si ya respondieron TODOS los jugadores de la partida:
+    // Si ya respondieron todos los participantes en esta ronda:
     if (jugadorActualIdx >= jugadores.length) {
-      // Reiniciar índice al primer jugador
       jugadorActualIdx = 0;
-      categoriaRondaActual = null; // Liberar categoría para requerir un nuevo giro de ruleta
+      categoriaRondaActual = null; // Reiniciar categoría para volver a girar la ruleta
 
       document.getElementById("card-pregunta").classList.add("hidden");
       document.getElementById("contenedor-ruleta").classList.remove("hidden");
@@ -267,7 +277,7 @@ function responder(idxSeleccionado, idxCorrecto, pts) {
 
       actualizarScoreboardVersus("¡Nueva tanda! Girá la ruleta");
     } else {
-      // Todavía quedan jugadores en esta tanda: mostrar pregunta directa de la MISMA categoría
+      // Siguiente jugador responde una pregunta de la misma categoría de la tanda
       obtenerPreguntaYMostrar();
     }
   }, 2000);
