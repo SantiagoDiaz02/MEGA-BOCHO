@@ -6,13 +6,19 @@ let jugadores = [];
 let jugadorActualIdx = 0;
 let categoriaRondaActual = null;
 
-// Progreso de dificultad independiente por categoría (índice sobre el array filtrado de dificultades)
 let progresoDificultadCategoria = {};
 
 let anguloActual = 0;
 let enGiro = false;
 
 const todasLasDificultades = ["muy_facil", "facil", "intermedia", "dificil", "muy_dificil"];
+const nombresLegiblesDif = {
+  muy_facil: "Muy Fácil",
+  facil: "Fácil",
+  intermedia: "Intermedia",
+  dificil: "Difícil",
+  muy_dificil: "Muy Difícil"
+};
 const puntosPorDif = { muy_facil: 100, facil: 150, intermedia: 200, dificil: 250, muy_dificil: 300 };
 const coloresRuleta = ["#a044ff", "#00e5ff", "#ff007f", "#ffb703", "#10b981", "#8b5cf6", "#ec4899"];
 
@@ -58,10 +64,10 @@ function cargarCardsDificultades() {
 
   todasLasDificultades.forEach(dif => {
     const card = document.createElement("div");
-    card.className = "difficulty-card selected";
+    card.className = "category-card selected"; // Mismos estilos que las tarjetas de categoría
     card.innerHTML = `
       <input type="checkbox" value="${dif}" checked>
-      <span>${dif.replace('_', ' ').toUpperCase()}</span>
+      <span>${nombresLegiblesDif[dif]}</span>
     `;
 
     card.addEventListener("click", () => {
@@ -120,11 +126,9 @@ function iniciarModoVersus() {
   preguntasUsadas.clear();
 
   configVersus.categorias = catsElegidas;
-  // Mantener el orden relativo estándar (muy_facil -> muy_dificil) para las dificultades elegidas
   configVersus.dificultades = todasLasDificultades.filter(d => difsElegidas.includes(d));
   configVersus.totalJugadores = parseInt(document.getElementById("num-jugadores").value) || 2;
 
-  // Inicializar cada categoría en la primera dificultad elegida (índice 0)
   progresoDificultadCategoria = {};
   catsElegidas.forEach(cat => {
     progresoDificultadCategoria[cat] = 0;
@@ -226,7 +230,6 @@ function obtenerPreguntaYMostrar() {
   let pool = (bancoPreguntas[categoriaRondaActual] && bancoPreguntas[categoriaRondaActual][difActual]) || [];
   let disponibles = pool.filter(p => !preguntasUsadas.has(p.id));
 
-  // Buscar en los siguientes niveles tildados si no quedan en el actual
   while (disponibles.length === 0 && idxDif < difsSeleccionadas.length - 1) {
     idxDif++;
     progresoDificultadCategoria[categoriaRondaActual] = idxDif;
@@ -240,12 +243,12 @@ function obtenerPreguntaYMostrar() {
     const preguntaSeleccionada = {
       ...elegida,
       categoria: categoriaRondaActual,
-      dificultadNombre: difActual,
+      dificultadNombre: nombresLegiblesDif[difActual] || difActual,
       pts: puntosPorDif[difActual]
     };
 
     document.getElementById("contenedor-ruleta").classList.add("hidden");
-    mostrarPreguntaUI(preguntaSeleccionada, difActual.replace('_', ' '));
+    mostrarPreguntaUI(preguntaSeleccionada, preguntaSeleccionada.dificultadNombre);
   } else {
     verificarQuedanPreguntasOFinalizar();
   }
@@ -325,10 +328,7 @@ function responder(idxSeleccionado, idxCorrecto, pts) {
 
     if (jugadorActualIdx >= jugadores.length) {
       jugadorActualIdx = 0;
-
-      // Avanzar al siguiente nivel tildado en la configuración
       progresoDificultadCategoria[categoriaRondaActual]++;
-
       categoriaRondaActual = null;
 
       document.getElementById("card-pregunta").classList.add("hidden");
