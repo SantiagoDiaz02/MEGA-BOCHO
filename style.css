@@ -7,6 +7,11 @@
   --purple-hover: #6c2bd9;
   --text-white: #ffffff;
   --text-muted: #d0c2f0;
+  
+  --kahoot-green: #26890c;
+  --kahoot-green-dark: #185907;
+  --kahoot-red: #e21b3c;
+  --kahoot-red-dark: #9e0e25;
 }
 
 * {
@@ -74,7 +79,6 @@ body {
   margin-bottom: 22px;
 }
 
-/* Categorías estilo Card de Kahoot */
 .kahoot-categories-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -110,7 +114,6 @@ body {
   display: none;
 }
 
-/* Stepper de Números */
 .steppers-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -172,7 +175,6 @@ body {
   box-shadow: none;
 }
 
-/* Inputs de Nombres */
 .inputs-jugadores {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -194,10 +196,9 @@ body {
   border-color: #00e5ff;
 }
 
-/* Botones Grandes */
 .btn-kahoot-start {
   width: 100%;
-  background-color: #26890c;
+  background-color: var(--kahoot-green);
   color: white;
   border: none;
   padding: 16px;
@@ -205,18 +206,18 @@ body {
   font-weight: 900;
   border-radius: 12px;
   cursor: pointer;
-  box-shadow: 0 6px 0 #185907;
+  box-shadow: 0 6px 0 var(--kahoot-green-dark);
   transition: all 0.1s ease;
   margin-top: 10px;
 }
 
 .btn-kahoot-start:hover {
-  background-color: #2db30f;
+  filter: brightness(1.1);
 }
 
 .btn-kahoot-start:active {
   transform: translateY(4px);
-  box-shadow: 0 2px 0 #185907;
+  box-shadow: 0 2px 0 var(--kahoot-green-dark);
 }
 
 /* Ruleta Canvas y Aguja */
@@ -252,7 +253,6 @@ body {
   transition: transform 3.5s cubic-bezier(0.1, 0.9, 0.2, 1);
 }
 
-/* Marcador y Pregunta */
 .scoreboard {
   display: flex;
   justify-content: space-around;
@@ -290,11 +290,112 @@ body {
   border-radius: 10px;
   cursor: pointer;
   box-shadow: 0 4px 0 #280c57;
+  transition: all 0.2s ease;
 }
 
 .btn-opcion:active {
   transform: translateY(2px);
   box-shadow: none;
+}
+
+/* Clases de Feedback para los Botones */
+.btn-opcion.correcta {
+  background-color: var(--kahoot-green) !important;
+  box-shadow: 0 4px 0 var(--kahoot-green-dark) !important;
+  color: white;
+  animation: pulsoVerde 0.4s ease;
+}
+
+.btn-opcion.incorrecta {
+  background-color: var(--kahoot-red) !important;
+  box-shadow: 0 4px 0 var(--kahoot-red-dark) !important;
+  color: white;
+  opacity: 0.85;
+}
+
+.btn-opcion.atenuada {
+  opacity: 0.35;
+  filter: grayscale(0.5);
+}
+
+@keyframes pulsoVerde {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Overlay y Modal de Respuesta */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 3, 40, 0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-card {
+  background-color: var(--purple-card);
+  border-radius: 20px;
+  padding: 30px 40px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.feedback-icon {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  margin: 0 auto 15px auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 3rem;
+  font-weight: 900;
+  color: white;
+}
+
+.modal-card.correcto .feedback-icon {
+  background-color: var(--kahoot-green-dark);
+  box-shadow: 0 0 20px var(--kahoot-green);
+}
+
+.modal-card.incorrecto .feedback-icon {
+  background-color: var(--kahoot-red-dark);
+  box-shadow: 0 0 20px var(--kahoot-red);
+}
+
+.feedback-title {
+  font-size: 2rem;
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+
+.feedback-subtitle {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes popIn {
+  from { transform: scale(0.7); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
 .hidden { display: none !important; }
