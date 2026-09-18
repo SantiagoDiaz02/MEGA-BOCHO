@@ -71,11 +71,16 @@
         <div class="stat"><small>Estado</small><strong id="txt-progreso">Cargando...</strong></div>
       </div>
 
+      <!-- Ruleta Gráfica con Flecha Indicadora -->
       <div id="contenedor-ruleta" class="kahoot-card text-center">
-        <div id="ruleta-visual" class="ruleta-box">GIRA LA RULETA</div>
+        <div class="ruleta-wrapper">
+          <div class="flecha-indicadora">▼</div>
+          <canvas id="canvas-ruleta" width="300" height="300"></canvas>
+        </div>
         <button id="btn-girar" class="btn-kahoot-start" onclick="girarRuleta()">Girar Ruleta</button>
       </div>
 
+      <!-- Tarjeta de Pregunta Activa -->
       <div id="card-pregunta" class="kahoot-card hidden">
         <div class="pregunta-header">
           <span id="badge-categoria" class="badge">Categoría</span>
