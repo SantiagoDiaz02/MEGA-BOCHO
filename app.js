@@ -77,7 +77,6 @@ function iniciarModoVersus() {
   const catsElegidas = Array.from(checkboxes).map(cb => cb.value);
 
   if (catsElegidas.length === 0) {
-    alert("¡Por favor seleccioná al menos una categoría!");
     return;
   }
 
@@ -214,12 +213,18 @@ function mostrarPreguntaUI(p, nombreDificultad) {
 
 function responder(idxSeleccionado, idxCorrecto, pts) {
   const botones = document.querySelectorAll(".btn-opcion");
+  
+  // Deshabilitar botones inmediatamente para prevenir doble click
   botones.forEach(btn => btn.disabled = true);
 
   const esCorrecta = idxSeleccionado === idxCorrecto;
   const jActual = jugadores[jugadorActualIdx];
 
-  // Marcar visualmente las opciones en la pantalla de la pregunta
+  if (esCorrecta) {
+    jActual.puntos += pts;
+  }
+
+  // Iluminar la respuesta seleccionada y la correcta
   botones.forEach((btn, index) => {
     if (index === idxCorrecto) {
       btn.classList.add("correcta");
@@ -230,50 +235,16 @@ function responder(idxSeleccionado, idxCorrecto, pts) {
     }
   });
 
-  if (esCorrecta) {
-    jActual.puntos += pts;
-  }
-
-  // Mostrar modal con breve delay para ver la opción resaltada
+  // Esperar 2 segundos mostrando los colores y pasar de turno fluidamente
   setTimeout(() => {
-    mostrarModalFeedback(esCorrecta, jActual.nombre, pts);
-  }, 700);
-}
+    jugadorActualIdx = (jugadorActualIdx + 1) % jugadores.length;
+    
+    document.getElementById("card-pregunta").classList.add("hidden");
+    document.getElementById("contenedor-ruleta").classList.remove("hidden");
+    document.getElementById("btn-girar").disabled = false;
 
-function mostrarModalFeedback(esCorrecta, nombreJugador, pts) {
-  const modalOverlay = document.getElementById("modal-overlay");
-  const modalCard = document.getElementById("modal-feedback");
-  const icon = document.getElementById("feedback-icon");
-  const titulo = document.getElementById("feedback-titulo");
-  const subtitulo = document.getElementById("feedback-subtitulo");
-
-  modalCard.classList.remove("correcto", "incorrecto");
-
-  if (esCorrecta) {
-    modalCard.classList.add("correcto");
-    icon.innerText = "✓";
-    titulo.innerText = "¡CORRECTO!";
-    subtitulo.innerText = `${nombreJugador} sumó +${pts} pts`;
-  } else {
-    modalCard.classList.add("incorrecto");
-    icon.innerText = "✕";
-    titulo.innerText = "INCORRECTO";
-    subtitulo.innerText = `${nombreJugador} no suma puntos`;
-  }
-
-  modalOverlay.classList.remove("hidden");
-}
-
-function cerrarFeedbackYContinuar() {
-  document.getElementById("modal-overlay").classList.add("hidden");
-
-  jugadorActualIdx = (jugadorActualIdx + 1) % jugadores.length;
-
-  document.getElementById("card-pregunta").classList.add("hidden");
-  document.getElementById("contenedor-ruleta").classList.remove("hidden");
-  document.getElementById("btn-girar").disabled = false;
-
-  actualizarScoreboardVersus();
+    actualizarScoreboardVersus();
+  }, 2000);
 }
 
 function actualizarScoreboardVersus() {
@@ -289,7 +260,6 @@ function actualizarScoreboardVersus() {
 function avanzarCategoriaVersus() {
   categoriaActualIdx++;
   if (categoriaActualIdx < configVersus.categorias.length) {
-    alert(`📌 Categoria finalizada. Siguiente categoría: ${configVersus.categorias[categoriaActualIdx]}`);
     prepararColaCategoriaVersus();
     actualizarScoreboardVersus();
     
