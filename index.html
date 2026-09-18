@@ -5,67 +5,78 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MEGA BOCHO - Modo Versus</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Open+Sans:wght@600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
   <div class="main-container">
-    <header>
-      <h1>🧠 MEGA BOCHO 🧠</h1>
+    <header class="kahoot-header">
+      <h1>💜 MEGA BOCHO 💜</h1>
       <p class="subtitle">Modo Versus por Categorías</p>
     </header>
 
     <!-- Configuración de Sala Versus -->
-    <section id="sec-config-versus" class="card">
-      <h2>Configuración de la Sala</h2>
+    <section id="sec-config-versus" class="kahoot-card">
+      <h2 class="section-title">Configuración de la Sala</h2>
       
+      <!-- Selección de Categorías tipo Cards Kahoot -->
       <div class="form-group">
-        <label>Categorías a jugar:</label>
-        <div id="check-categorias" class="checkbox-group">
-          <!-- Cargadas dinámicamente con JS -->
+        <label class="group-label">Seleccioná las Categorías:</label>
+        <div id="check-categorias" class="kahoot-categories-grid">
+          <!-- Cargadas dinámicamente -->
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="num-preguntas-dif">Preguntas por dificultad (por categoría):</label>
-        <input type="number" id="num-preguntas-dif" value="2" min="1" max="10">
+      <!-- Controles Numéricos (Steppers con Flechas) -->
+      <div class="steppers-grid">
+        <div class="form-group stepper-box">
+          <label for="num-preguntas-dif">Preguntas por dificultad:</label>
+          <div class="number-stepper">
+            <button type="button" class="btn-stepper" onclick="modificarNumero('num-preguntas-dif', -1, 1, 10)">▼</button>
+            <input type="number" id="num-preguntas-dif" value="2" min="1" max="10" readonly>
+            <button type="button" class="btn-stepper" onclick="modificarNumero('num-preguntas-dif', 1, 1, 10)">▲</button>
+          </div>
+        </div>
+
+        <div class="form-group stepper-box">
+          <label for="num-jugadores">Cantidad de participantes:</label>
+          <div class="number-stepper">
+            <button type="button" class="btn-stepper" onclick="modificarNumero('num-jugadores', -1, 1, 8, true)">▼</button>
+            <input type="number" id="num-jugadores" value="2" min="1" max="8" readonly>
+            <button type="button" class="btn-stepper" onclick="modificarNumero('num-jugadores', 1, 1, 8, true)">▲</button>
+          </div>
+        </div>
       </div>
 
+      <!-- Nombres de Jugadores -->
       <div class="form-group">
-        <label for="num-jugadores">Cantidad de jugadores:</label>
-        <input type="number" id="num-jugadores" value="2" min="1" max="8" onchange="generarCamposJugadores()">
-      </div>
-
-      <!-- Sección dinámica para nombres de jugadores -->
-      <div class="form-group">
-        <label>Nombres de los Participantes:</label>
+        <label class="group-label">Nombres de los Participantes:</label>
         <div id="contenedor-jugadores" class="inputs-jugadores">
           <!-- Inputs generados dinámicamente -->
         </div>
       </div>
 
       <div class="actions">
-        <button class="btn-primary" onclick="iniciarModoVersus()">¡Empezar Batalla!</button>
+        <button class="btn-kahoot-start" onclick="iniciarModoVersus()">¡EMPEZAR BATALLA!</button>
       </div>
     </section>
 
     <!-- Tablero Principal de Juego -->
     <section id="sec-juego" class="hidden">
-      
-      <!-- Marcador global -->
-      <div class="scoreboard card">
-        <div class="stat"><small>Jugador Actual</small><strong id="txt-jugador">Jugador 1</strong></div>
+      <div class="scoreboard kahoot-card">
+        <div class="stat"><small>Turno de</small><strong id="txt-jugador">Jugador 1</strong></div>
         <div class="stat"><small>Puntos</small><strong id="txt-puntos">0 pts</strong></div>
         <div class="stat"><small>Estado</small><strong id="txt-progreso">Cargando...</strong></div>
       </div>
 
-      <!-- Ruleta / Seleccionador -->
-      <div id="contenedor-ruleta" class="card">
+      <div id="contenedor-ruleta" class="kahoot-card text-center">
         <div id="ruleta-visual" class="ruleta-box">GIRA LA RULETA</div>
-        <button id="btn-girar" class="btn-primary" onclick="girarRuleta()">Girar Ruleta</button>
+        <button id="btn-girar" class="btn-kahoot-start" onclick="girarRuleta()">Girar Ruleta</button>
       </div>
 
-      <!-- Tarjeta de Pregunta Activa -->
-      <div id="card-pregunta" class="card hidden">
+      <div id="card-pregunta" class="kahoot-card hidden">
         <div class="pregunta-header">
           <span id="badge-categoria" class="badge">Categoría</span>
           <span id="badge-dificultad" class="badge badge-pts">Nivel - Pts</span>
@@ -73,7 +84,6 @@
         <h3 id="txt-pregunta">Texto de la pregunta</h3>
         <div id="grid-opciones" class="opciones-grid"></div>
       </div>
-
     </section>
 
   </div>
