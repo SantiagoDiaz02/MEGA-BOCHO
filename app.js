@@ -6,8 +6,9 @@ let jugadores = [];
 let jugadorActualIdx = 0;
 let categoriaRondaActual = null;
 
-let progresoDificultadCategoria = {}; 
-let contadorPreguntasPorDif = {};     
+// Control de avance e historial individual
+let progresoDificultadCategoria = {}; // { Categoria: indiceDificultadActual }
+let preguntasRespondidasPorJugador = {}; // { "NombreJugador_Categoria_Dificultad": cantidad }
 
 let anguloActual = 0;
 let enGiro = false;
@@ -132,23 +133,24 @@ function iniciarModoVersus() {
   configVersus.totalJugadores = parseInt(document.getElementById("num-jugadores").value) || 2;
 
   progresoDificultadCategoria = {};
-  contadorPreguntasPorDif = {};
-
-  catsElegidas.forEach(cat => {
-    progresoDificultadCategoria[cat] = 0;
-    configVersus.dificultades.forEach(dif => {
-      contadorPreguntasPorDif[`${cat}_${dif}`] = 0;
-    });
-  });
+  preguntasRespondidasPorJugador = {};
 
   jugadores = [];
   for (let i = 1; i <= configVersus.totalJugadores; i++) {
     const nombreInput = document.getElementById(`input-jugador-${i}`).value.trim();
-    jugadores.push({
-      nombre: nombreInput !== "" ? nombreInput : `Jugador ${i}`,
-      puntos: 0
+    const nombre = nombreInput !== "" ? nombreInput : `Jugador ${i}`;
+    jugadores.push({ nombre: nombre, puntos: 0 });
+
+    catsElegidas.forEach(cat => {
+      configVersus.dificultades.forEach(dif => {
+        preguntasRespondidasPorJugador[`${nombre}_${cat}_${dif}`] = 0;
+      });
     });
   }
+
+  catsElegidas.forEach(cat => {
+    progresoDificultadCategoria[cat] = 0;
+  });
 
   jugadorActualIdx = 0;
   categoriaRondaActual = null;
@@ -244,10 +246,14 @@ function obtenerPreguntaYMostrar() {
     return;
   }
 
+  // La categoría avanza de nivel solo si TODOS los jugadores cumplieron la cuota individual en la dificultad actual
   let difActual = difsSeleccionadas[idxDif];
-  let claveContador = `${categoriaRondaActual}_${difActual}`;
+  let todosCumplieron = jugadores.every(j => {
+    let clave = `${j.nombre}_${categoriaRondaActual}_${difActual}`;
+    return (preguntasRespondidasPorJugador[clave] || 0) >= configVersus.preguntasPorDif;
+  });
 
-  if (contadorPreguntasPorDif[claveContador] >= configVersus.preguntasPorDif) {
+  if (todosCumplieron) {
     progresoDificultadCategoria[categoriaRondaActual]++;
     obtenerPreguntaYMostrar();
     return;
@@ -260,7 +266,6 @@ function obtenerPreguntaYMostrar() {
     idxDif++;
     progresoDificultadCategoria[categoriaRondaActual] = idxDif;
     difActual = difsSeleccionadas[idxDif];
-    claveContador = `${categoriaRondaActual}_${difActual}`;
     pool = (bancoPreguntas[categoriaRondaActual] && bancoPreguntas[categoriaRondaActual][difActual]) || [];
     disponibles = pool.filter(p => !preguntasUsadas.has(p.id));
   }
@@ -284,14 +289,13 @@ function obtenerPreguntaYMostrar() {
 function eliminarCategoriaCompletada(catCompletada) {
   configVersus.categorias = configVersus.categorias.filter(c => c !== catCompletada);
   
-  // Resetear la rotación visual al recalibrar sectores de la ruleta
   const canvas = document.getElementById("canvas-ruleta");
   canvas.style.transform = `rotate(0deg)`;
   anguloActual = 0;
 
   if (configVersus.categorias.length > 0) {
     dibujarRuleta();
-    actualizarScoreboardVersus(`¡${catCompletada} eliminada! Girá de nuevo.`);
+    actualizarScoreboardVersus(`¡${catCompletada} completada! Girá de nuevo.`);
     document.getElementById("btn-girar").disabled = false;
   } else {
     mostrarResultadosVersus();
@@ -301,10 +305,13 @@ function eliminarCategoriaCompletada(catCompletada) {
 function mostrarPreguntaUI(p, nombreDificultad) {
   preguntasUsadas.add(p.id);
 
+  let jActual = jugadores[jugadorActualIdx];
   let idxDif = progresoDificultadCategoria[categoriaRondaActual];
   let difActual = configVersus.dificultades[idxDif];
-  let claveContador = `${categoriaRondaActual}_${difActual}`;
-  contadorPreguntasPorDif[claveContador] = (contadorPreguntasPorDif[claveContador] || 0) + 1;
+  let claveContador = `${jActual.nombre}_${categoriaRondaActual}_${difActual}`;
+  
+  // Incrementar el conteo individual del jugador activo
+  preguntasRespondidasPorJugador[claveContador] = (preguntasRespondidasPorJugador[claveContador] || 0) + 1;
 
   document.getElementById("badge-categoria").innerText = p.categoria;
   document.getElementById("badge-dificultad").innerText = `${nombreDificultad.toUpperCase()} - ${p.pts} pts`;
